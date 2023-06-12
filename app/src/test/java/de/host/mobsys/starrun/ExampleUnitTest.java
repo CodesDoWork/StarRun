@@ -1,4 +1,4 @@
-package com.example.starrun;
+package de.host.mobsys.starrun;
 
 import org.junit.Test;
 

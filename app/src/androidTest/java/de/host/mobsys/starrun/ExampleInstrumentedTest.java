@@ -1,4 +1,4 @@
-package com.example.starrun;
+package de.host.mobsys.starrun;
 
 import android.content.Context;
 
