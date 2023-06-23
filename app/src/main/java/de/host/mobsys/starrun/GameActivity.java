@@ -111,7 +111,7 @@ public class GameActivity extends AppCompatActivity {
             new Position(80, 10),
             Size.fromWidthAndAspectRatio(15, 428 / 168f)
         );
-        ScoreObject scoreObject = new ScoreObject(scoreRect);
+        ScoreObject scoreObject = new ScoreObject(scoreRect, this);
         scoreLayer.add(scoreObject);
     }
 
