@@ -3,6 +3,8 @@ package de.host.mobsys.starrun;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.Display;
@@ -12,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 
 import de.host.mobsys.starrun.base.GameLayer;
 import de.host.mobsys.starrun.base.GameView;
@@ -22,12 +25,15 @@ import de.host.mobsys.starrun.base.size.SizeSystem;
 import de.host.mobsys.starrun.base.size.systems.PercentSizeSystem;
 import de.host.mobsys.starrun.views.Background;
 import de.host.mobsys.starrun.views.Player;
+import de.host.mobsys.starrun.views.ScoreObject;
 
 public class GameActivity extends AppCompatActivity {
 
     private final GameLayer backgroundLayer = new GameLayer();
     private final GameLayer collisionLayer = new GameLayer();
     private final GameLayer overlayLayer = new GameLayer();
+
+    private final GameLayer scoreLayer = new GameLayer();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,9 +81,11 @@ public class GameActivity extends AppCompatActivity {
         game.add(backgroundLayer);
         game.add(collisionLayer);
         game.add(overlayLayer);
+        game.add(scoreLayer);
 
         createBackground();
         createPlayer();
+        createScore();
     }
 
     private void createBackground() {
@@ -98,6 +106,15 @@ public class GameActivity extends AppCompatActivity {
         collisionLayer.add(player);
     }
 
+    private void createScore() {
+        Rect scoreRect = new Rect(
+            new Position(80, 10),
+            Size.fromWidthAndAspectRatio(15, 428 / 168f)
+        );
+        ScoreObject scoreObject = new ScoreObject(scoreRect);
+        scoreLayer.add(scoreObject);
+    }
+
     private Bitmap loadAsset(String fileName) {
         AssetManager assets = getResources().getAssets();
         try (InputStream playerSpriteStream = assets.open(fileName)) {
@@ -107,3 +124,4 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 }
+

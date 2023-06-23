@@ -31,12 +31,20 @@ public class GameLayer {
 
         gameObjectsToRemove.forEach(gameObjects::remove);
         gameObjectsToRemove.clear();
+
+        for (GameObject gameObject : gameObjects) {
+            gameObject.update(frameDuration);
+        }
     }
 
     public void draw(Canvas canvas) {
         canvas.translate(position.getXPx(), position.getYPx());
         gameObjects.forEach(gameObject -> gameObject.draw(canvas));
         canvas.translate(-position.getXPx(), -position.getYPx());
+
+        for (GameObject gameObject : gameObjects) {
+            gameObject.draw(canvas);
+        }
     }
 
     public void translate(float x, float y) {
