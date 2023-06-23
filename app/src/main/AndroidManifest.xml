@@ -13,15 +13,17 @@
         android:theme="@style/Theme.StarRun"
         tools:targetApi="31">
         <activity
-            android:screenOrientation="userLandscape"
-            android:name="de.host.mobsys.starrun.GameActivity"
-            android:exported="true">
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="userLandscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".GameActivity"
+            android:screenOrientation="userLandscape" />
     </application>
 
 </manifest>

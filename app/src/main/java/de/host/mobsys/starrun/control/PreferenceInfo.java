@@ -9,6 +9,12 @@ import java.lang.reflect.Type;
  **/
 public class PreferenceInfo<T> {
 
+    public static final PreferenceInfo<Integer> HIGHSCORE = new PreferenceInfo<>(
+        "highscore",
+        Integer.class,
+        0
+    );
+
     public final String key;
     public final Type type;
     public final T defaultValue;

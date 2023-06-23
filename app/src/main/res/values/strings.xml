@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">StarRun</string>
+    <string name="highscore">Highscore: %d</string>
+    <string name="play">Play</string>
 </resources>
