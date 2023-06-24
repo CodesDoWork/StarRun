@@ -110,7 +110,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void createScore() {
         Rect scoreRect = new Rect(
-            new Position(80, 10),
+            new Position(80, 5),
             Size.fromWidthAndHeight(15, 15)
         );
         ScoreObject scoreObject = new ScoreObject(scoreRect, this);
