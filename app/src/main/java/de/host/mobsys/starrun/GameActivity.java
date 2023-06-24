@@ -33,8 +33,6 @@ public class GameActivity extends AppCompatActivity {
     private final GameLayer collisionLayer = new GameLayer();
     private final GameLayer overlayLayer = new GameLayer();
 
-    private final GameLayer scoreLayer = new GameLayer();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,7 +79,6 @@ public class GameActivity extends AppCompatActivity {
         game.add(backgroundLayer);
         game.add(collisionLayer);
         game.add(overlayLayer);
-        game.add(scoreLayer);
 
         createBackground();
         createPlayer();
@@ -109,10 +106,10 @@ public class GameActivity extends AppCompatActivity {
     private void createScore() {
         Rect scoreRect = new Rect(
             new Position(80, 10),
-            Size.fromWidthAndAspectRatio(15, 428 / 168f)
+            Size.fromWidthAndHeight(15, 15)
         );
         ScoreObject scoreObject = new ScoreObject(scoreRect, this);
-        scoreLayer.add(scoreObject);
+        overlayLayer.add(scoreObject);
     }
 
     private Bitmap loadAsset(String fileName) {

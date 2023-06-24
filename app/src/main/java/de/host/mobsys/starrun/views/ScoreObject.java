@@ -13,18 +13,17 @@ import de.host.mobsys.starrun.base.GameObject;
 import de.host.mobsys.starrun.base.size.Rect;
 
 /*
-Die Klasse ScoreObject präsentiert den Score (Punktestand) beim Spiel. Es basiert auf eine Zeiteingabe.
-Der Score erhöht sich um 1, nach einer 1 Sekunde. Außerdem speichert er den höchst erzielten Score als
-Highscore.
+The ScoreObject class presents the score at the game. It is based on a time input. The score increases
+by 1, after a 1 second. It also stores the highest score achieved as the highscore.
  */
-public class ScoreObject extends GameObject {
+public class ScoreObject extends TextObject {
     private int score = 0;
     private int highScore = 0;
     private Duration elapsedTime = Duration.ZERO;
     private SharedPreferences sharedPreferences;
 
     public ScoreObject(Rect rect, Context context) {
-        super(rect);
+        super(rect, "", Color.WHITE);
         sharedPreferences = context.getSharedPreferences("my_preferences", Context.MODE_PRIVATE);
         highScore = sharedPreferences.getInt("high_score", 0);
     }
@@ -40,15 +39,8 @@ public class ScoreObject extends GameObject {
 
     @Override
     public void draw(Canvas canvas) {
-        Paint paint = new Paint();
-        paint.setColor(Color.WHITE);
-        paint.setTextSize(48f);
-
-        float textX = rect.getLeftPx();
-        float textY = rect.getTopPx() + paint.getTextSize();
-
-        canvas.drawText("Score: " + score, textX, textY, paint);
-        canvas.drawText("High-Score: " + highScore, textX, textY + paint.getTextSize(), paint);
+        text = "Score: " + score + "\nHigh-Score: " + highScore;
+        super.draw(canvas);
     }
 
     public void saveHighScore() {
