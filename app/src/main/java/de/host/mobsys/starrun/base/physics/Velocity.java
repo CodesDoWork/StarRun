@@ -6,6 +6,9 @@ import java.time.Duration;
 
 import de.host.mobsys.starrun.base.size.SizeVector2D;
 
+/**
+ * Represents a velocity as 2D vector with a duration.
+ */
 public class Velocity extends SizeVector2D {
     public static Velocity ZERO = new Velocity(0, 0);
 

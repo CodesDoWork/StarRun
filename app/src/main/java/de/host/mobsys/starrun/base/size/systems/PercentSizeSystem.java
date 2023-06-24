@@ -2,6 +2,9 @@ package de.host.mobsys.starrun.base.size.systems;
 
 import de.host.mobsys.starrun.base.size.SizeSystem;
 
+/**
+ * Scales sizes as percentages (0 to 100) of the display width and height.
+ */
 public class PercentSizeSystem extends SizeSystem {
 
     @Override

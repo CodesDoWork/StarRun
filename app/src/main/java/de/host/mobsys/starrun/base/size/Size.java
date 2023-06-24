@@ -1,5 +1,9 @@
 package de.host.mobsys.starrun.base.size;
 
+/**
+ * Represents a rectangular size as 2D vector with x (width) and y (height) values notated in units
+ * of the SizeSystem set.
+ */
 public class Size extends SizeVector2D {
 
     private Size(float width, float height) {

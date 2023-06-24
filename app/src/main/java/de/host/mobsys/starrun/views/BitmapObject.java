@@ -8,6 +8,9 @@ import de.host.mobsys.starrun.base.physics.Velocity;
 import de.host.mobsys.starrun.base.size.BitmapUtils;
 import de.host.mobsys.starrun.base.size.Rect;
 
+/**
+ * A GameObject drawing a bitmap to the screen.
+ */
 public class BitmapObject extends GameObject {
 
     protected final Bitmap sprite;

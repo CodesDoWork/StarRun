@@ -1,5 +1,8 @@
 package de.host.mobsys.starrun.base.size;
 
+/**
+ * Rectangular bounds for a view with a position and a size.
+ */
 public class Rect {
 
     public final Position position;

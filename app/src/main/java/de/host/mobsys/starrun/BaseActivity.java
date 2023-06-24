@@ -8,6 +8,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import de.host.mobsys.starrun.control.PreferenceStorage;
 
+/**
+ * A superclass for fullscreen activities with a preference storage.
+ */
 public class BaseActivity extends AppCompatActivity {
 
     protected PreferenceStorage storage;

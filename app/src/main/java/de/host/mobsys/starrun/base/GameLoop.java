@@ -2,6 +2,9 @@ package de.host.mobsys.starrun.base;
 
 import java.time.Duration;
 
+/**
+ * Class handling game-loop-logic to trigger update events of a game at a given or free frame rate.
+ */
 class GameLoop {
 
     private final Duration targetFrameTime;

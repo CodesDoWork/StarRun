@@ -14,6 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
+/**
+ * This class can be added as a view to an activity.
+ * It runs a game loop and triggers update, draw and touch events on its GameLayers and therefore
+ * their GameObjects.
+ */
 public class GameView extends SurfaceView {
     private final SurfaceHolder surfaceHolder;
     private final GameThread gameThread;
