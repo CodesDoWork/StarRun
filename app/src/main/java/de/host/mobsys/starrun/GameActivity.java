@@ -23,6 +23,7 @@ import de.host.mobsys.starrun.base.size.Rect;
 import de.host.mobsys.starrun.base.size.Size;
 import de.host.mobsys.starrun.base.size.SizeSystem;
 import de.host.mobsys.starrun.base.size.systems.PercentSizeSystem;
+import de.host.mobsys.starrun.control.PreferenceStorage;
 import de.host.mobsys.starrun.views.Background;
 import de.host.mobsys.starrun.views.Player;
 import de.host.mobsys.starrun.views.ScoreObject;
@@ -33,9 +34,13 @@ public class GameActivity extends AppCompatActivity {
     private final GameLayer collisionLayer = new GameLayer();
     private final GameLayer overlayLayer = new GameLayer();
 
+    private PreferenceStorage storage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        storage = new PreferenceStorage(this);
 
         setupSizeSystem();
         setupGame();
