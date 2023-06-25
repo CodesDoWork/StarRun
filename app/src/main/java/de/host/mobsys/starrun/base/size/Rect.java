@@ -1,16 +1,32 @@
 package de.host.mobsys.starrun.base.size;
 
+import android.graphics.Matrix;
+
 /**
- * Rectangular bounds for a view with a position and a size.
+ * Rectangular bounds for a view with a position, a size, and a rotation.
  */
 public class Rect {
 
     public final Position position;
     public final Size size;
+    private float rotation;
 
-    public Rect(Position position, Size size) {
+    public Rect(Position position, Size size, float rotation) {
         this.position = position;
         this.size = size;
+        this.rotation = rotation;
+    }
+
+    public Rect(Position position, Size size) {
+        this(position, size, 0);
+    }
+
+    public float getRotation() {
+        return rotation;
+    }
+
+    public void rotate(float angle) {
+        rotation += angle;
     }
 
     public float getLeft() {
@@ -49,6 +65,13 @@ public class Rect {
         position.translate(x, y);
     }
 
+    public Matrix getMatrix() {
+        Matrix matrix = position.getMatrix();
+        matrix.preRotate(rotation, size.getWidthPx() / 2f, size.getHeightPx() / 2f);
+
+        return matrix;
+    }
+
     public boolean contains(float x, float y) {
         return x >= position.getXPx()
                && x <= position.getXPx() + size.getWidthPx()
@@ -61,13 +84,6 @@ public class Rect {
                && other.getRightPx() >= getLeftPx()
                && other.getTopPx() <= getBottomPx()
                && other.getBottomPx() >= getTopPx();
-    }
-
-    public boolean isOutOfScreen() {
-        return getRightPx() < 0
-               || getBottomPx() < 0
-               || getLeftPx() > SizeSystem.getDisplayWidth()
-               || getTopPx() > SizeSystem.getDisplayHeight();
     }
 
     public void ensureInScreen() {

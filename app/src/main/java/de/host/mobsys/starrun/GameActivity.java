@@ -1,14 +1,9 @@
 package de.host.mobsys.starrun;
 
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Display;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 import de.host.mobsys.starrun.base.GameLayer;
 import de.host.mobsys.starrun.base.GameView;
@@ -17,18 +12,27 @@ import de.host.mobsys.starrun.base.size.Rect;
 import de.host.mobsys.starrun.base.size.Size;
 import de.host.mobsys.starrun.base.size.SizeSystem;
 import de.host.mobsys.starrun.base.size.systems.PercentSizeSystem;
+import de.host.mobsys.starrun.control.Assets;
+import de.host.mobsys.starrun.views.Asteroid;
 import de.host.mobsys.starrun.views.Background;
+import de.host.mobsys.starrun.views.CollisionLayer;
 import de.host.mobsys.starrun.views.Player;
 
 public class GameActivity extends BaseActivity {
 
     private final GameLayer backgroundLayer = new GameLayer();
-    private final GameLayer collisionLayer = new GameLayer();
+    private final GameLayer collisionLayer = new CollisionLayer();
     private final GameLayer overlayLayer = new GameLayer();
+
+    private final Handler handler = new Handler();
+
+    private Assets assets;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        assets = new Assets(getResources().getAssets());
 
         setupSizeSystem();
         setupGame();
@@ -54,12 +58,13 @@ public class GameActivity extends BaseActivity {
 
         createBackground();
         createPlayer();
+        createAsteroids();
     }
 
     private void createBackground() {
         Background background = new Background(
             Size.fromHeightAndAspectRatio(110, 2),
-            loadAsset("space_bit_v2.png")
+            assets
         );
         backgroundLayer.add(background);
     }
@@ -69,17 +74,13 @@ public class GameActivity extends BaseActivity {
             new Position(5, 45),
             Size.fromWidthAndAspectRatio(15, 428 / 168f)
         );
-        Player player = new Player(playerRect, loadAsset("ship_cut.png"));
+        Player player = new Player(playerRect, assets.getPlayerBitmap());
         player.addOnMoveListener((x, y) -> backgroundLayer.translate(0, -y / 100));
         collisionLayer.add(player);
     }
 
-    private Bitmap loadAsset(String fileName) {
-        AssetManager assets = getResources().getAssets();
-        try (InputStream playerSpriteStream = assets.open(fileName)) {
-            return BitmapFactory.decodeStream(playerSpriteStream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private void createAsteroids() {
+        collisionLayer.add(Asteroid.createRandom(assets));
+        handler.postDelayed(this::createAsteroids, 3000);
     }
 }

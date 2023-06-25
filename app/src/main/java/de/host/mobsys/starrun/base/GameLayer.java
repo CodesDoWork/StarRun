@@ -15,25 +15,25 @@ import de.host.mobsys.starrun.base.size.Position;
  */
 public class GameLayer {
 
-    private final List<GameObject> gameObjects = new ArrayList<>();
+    protected final List<GameObject> gameObjects = new ArrayList<>();
     private final List<GameObject> gameObjectsToRemove = new ArrayList<>();
+    private final List<GameObject> gameObjectsToAdd = new ArrayList<>();
 
     private final Position position = new Position(0, 0);
 
     public void add(GameObject gameObject) {
-        gameObjects.add(gameObject);
+        gameObjectsToAdd.add(gameObject);
         gameObject.addOnDestroyListener(() -> gameObjectsToRemove.add(gameObject));
     }
 
     public void update(Duration frameDuration) {
-        // Use indexed loop and size before because objects can be added during updates.
-        int gameObjectsSize = gameObjects.size();
-        for (int i = 0; i < gameObjectsSize; ++i) {
-            gameObjects.get(i).update(frameDuration);
-        }
+        gameObjects.forEach(gameObject -> gameObject.update(frameDuration));
 
         gameObjectsToRemove.forEach(gameObjects::remove);
         gameObjectsToRemove.clear();
+
+        gameObjects.addAll(gameObjectsToAdd);
+        gameObjectsToAdd.clear();
     }
 
     public void draw(Canvas canvas) {

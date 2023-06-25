@@ -20,12 +20,16 @@ public class BitmapObject extends GameObject {
     }
 
     public BitmapObject(Rect rect, Velocity velocity, Bitmap sprite) {
-        super(rect, velocity);
+        this(rect, velocity, 0, sprite);
+    }
+
+    public BitmapObject(Rect rect, Velocity velocity, float rotationSpeed, Bitmap sprite) {
+        super(rect, velocity, rotationSpeed);
         this.sprite = BitmapUtils.scaleBitmap(sprite, rect.size);
     }
 
     @Override
     public void draw(Canvas canvas) {
-        canvas.drawBitmap(sprite, rect.position.getMatrix(), null);
+        canvas.drawBitmap(sprite, rect.getMatrix(), null);
     }
 }

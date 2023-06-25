@@ -19,14 +19,20 @@ public abstract class GameObject implements GameTouchListener {
     protected final Rect rect;
     private final List<OnDestroyListener> onDestroyListeners = new ArrayList<>();
     protected Velocity velocity;
+    protected float rotationSpeed;
 
     public GameObject(Rect rect) {
         this(rect, Velocity.ZERO);
     }
 
     public GameObject(Rect rect, Velocity velocity) {
+        this(rect, velocity, 0);
+    }
+
+    public GameObject(Rect rect, Velocity velocity, float rotationSpeed) {
         this.rect = rect;
         this.velocity = velocity;
+        this.rotationSpeed = rotationSpeed;
     }
 
     @Override
@@ -39,6 +45,7 @@ public abstract class GameObject implements GameTouchListener {
 
     public void update(Duration frameDuration) {
         rect.translate(velocity.getX(frameDuration), velocity.getY(frameDuration));
+        rect.rotate(rotationSpeed);
     }
 
     public abstract void draw(Canvas canvas);
