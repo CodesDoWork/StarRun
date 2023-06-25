@@ -17,6 +17,7 @@ import de.host.mobsys.starrun.views.Asteroid;
 import de.host.mobsys.starrun.views.Background;
 import de.host.mobsys.starrun.views.CollisionLayer;
 import de.host.mobsys.starrun.views.Player;
+import de.host.mobsys.starrun.views.ScoreObject;
 
 public class GameActivity extends BaseActivity {
 
@@ -59,6 +60,7 @@ public class GameActivity extends BaseActivity {
         createBackground();
         createPlayer();
         createAsteroids();
+        createScore();
     }
 
     private void createBackground() {
@@ -83,4 +85,14 @@ public class GameActivity extends BaseActivity {
         collisionLayer.add(Asteroid.createRandom(assets));
         handler.postDelayed(this::createAsteroids, 3000);
     }
+
+    private void createScore() {
+        Rect scoreRect = new Rect(
+            new Position(80, 5),
+            Size.fromWidthAndHeight(15, 15)
+        );
+        ScoreObject scoreObject = new ScoreObject(scoreRect, this);
+        overlayLayer.add(scoreObject);
+    }
 }
+
