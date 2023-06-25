@@ -3,6 +3,8 @@ package de.host.mobsys.starrun;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.Display;
@@ -12,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 
 import de.host.mobsys.starrun.base.GameLayer;
 import de.host.mobsys.starrun.base.GameView;
@@ -20,8 +23,10 @@ import de.host.mobsys.starrun.base.size.Rect;
 import de.host.mobsys.starrun.base.size.Size;
 import de.host.mobsys.starrun.base.size.SizeSystem;
 import de.host.mobsys.starrun.base.size.systems.PercentSizeSystem;
+import de.host.mobsys.starrun.control.PreferenceStorage;
 import de.host.mobsys.starrun.views.Background;
 import de.host.mobsys.starrun.views.Player;
+import de.host.mobsys.starrun.views.ScoreObject;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -29,9 +34,13 @@ public class GameActivity extends AppCompatActivity {
     private final GameLayer collisionLayer = new GameLayer();
     private final GameLayer overlayLayer = new GameLayer();
 
+    private PreferenceStorage storage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        storage = new PreferenceStorage(this);
 
         setupSizeSystem();
         setupGame();
@@ -78,6 +87,7 @@ public class GameActivity extends AppCompatActivity {
 
         createBackground();
         createPlayer();
+        createScore();
     }
 
     private void createBackground() {
@@ -98,6 +108,15 @@ public class GameActivity extends AppCompatActivity {
         collisionLayer.add(player);
     }
 
+    private void createScore() {
+        Rect scoreRect = new Rect(
+            new Position(80, 5),
+            Size.fromWidthAndHeight(15, 15)
+        );
+        ScoreObject scoreObject = new ScoreObject(scoreRect, this);
+        overlayLayer.add(scoreObject);
+    }
+
     private Bitmap loadAsset(String fileName) {
         AssetManager assets = getResources().getAssets();
         try (InputStream playerSpriteStream = assets.open(fileName)) {
@@ -107,3 +126,4 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 }
+
