@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.io.IOException;
 import java.io.InputStream;
 
+import de.host.mobsys.starrun.animations.ExplosionAnimation;
 import de.host.mobsys.starrun.base.GameLayer;
 import de.host.mobsys.starrun.base.GameView;
 import de.host.mobsys.starrun.base.size.Position;
@@ -28,6 +29,7 @@ public class GameActivity extends AppCompatActivity {
     private final GameLayer backgroundLayer = new GameLayer();
     private final GameLayer collisionLayer = new GameLayer();
     private final GameLayer overlayLayer = new GameLayer();
+    private final GameLayer animationLayer = new GameLayer();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +77,7 @@ public class GameActivity extends AppCompatActivity {
         game.add(backgroundLayer);
         game.add(collisionLayer);
         game.add(overlayLayer);
+        game.add(animationLayer);
 
         createBackground();
         createPlayer();
@@ -96,6 +99,8 @@ public class GameActivity extends AppCompatActivity {
         Player player = new Player(playerRect, loadAsset("ship_cut.png"));
         player.addOnMoveListener((x, y) -> backgroundLayer.translate(0, -y / 100));
         collisionLayer.add(player);
+        ExplosionAnimation explosionAnimation = new ExplosionAnimation(playerRect, loadAsset("explosion.png"));
+        animationLayer.add(explosionAnimation);
     }
 
     private Bitmap loadAsset(String fileName) {
