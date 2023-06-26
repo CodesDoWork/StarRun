@@ -3,7 +3,6 @@ package de.host.mobsys.starrun.base;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -23,14 +22,13 @@ public class GameView extends SurfaceView {
     private final SurfaceHolder surfaceHolder;
     private final GameThread gameThread;
     private final GameLoop gameLoop;
-    private final List<GameLayer> layers;
+    private final List<GameLayer> layers = new ArrayList<>();
 
     public GameView(Context context) {
         super(context);
         surfaceHolder = getHolder();
         gameThread = new GameThread();
         gameLoop = GameLoop.withFPSRate(60);
-        layers = new ArrayList<>();
 
         setOnTouchListener(new GameTouchListener());
     }
@@ -47,8 +45,8 @@ public class GameView extends SurfaceView {
         layers.add(layer);
     }
 
-    private void update(Duration frameDuration) {
-        layers.forEach(layer -> layer.update(frameDuration));
+    private void update(Duration elapsedTime) {
+        layers.forEach(layer -> layer.update(elapsedTime));
     }
 
     private void draw() {
@@ -57,7 +55,6 @@ public class GameView extends SurfaceView {
         }
 
         Canvas canvas = surfaceHolder.lockCanvas();
-        canvas.drawColor(Color.BLACK);
         layers.forEach(layer -> layer.draw(canvas));
         surfaceHolder.unlockCanvasAndPost(canvas);
     }
@@ -65,9 +62,16 @@ public class GameView extends SurfaceView {
     private class GameThread extends Thread {
         @Override
         public void run() {
-            gameLoop.start(frameDuration -> {
-                update(frameDuration);
-                draw();
+            gameLoop.start(new GameLoop.GameLoopListener() {
+                @Override
+                public void update(Duration elapsedTime) {
+                    GameView.this.update(elapsedTime);
+                }
+
+                @Override
+                public void draw() {
+                    GameView.this.draw();
+                }
             });
         }
     }
