@@ -114,7 +114,8 @@ public class GameActivity extends AppCompatActivity {
             Size.fromWidthAndHeight(13, 11)
         );
         animation.startAnimation();
-        animationLayer.add(animation);
+        //Remove the comment signs below to start the animation
+        //animationLayer.add(animation);
     }
 
     private void createScore() {
