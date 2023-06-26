@@ -1,5 +1,7 @@
 package de.host.mobsys.starrun.base.views;
 
+import android.graphics.Point;
+
 import java.time.Duration;
 
 import de.host.mobsys.starrun.base.CollidingGameObject;
@@ -19,9 +21,10 @@ public class CollisionLayer extends GameLayer {
             CollidingGameObject collidingObject = collidingObjects[i];
             for (int j = i + 1; j < collidingObjects.length; ++j) {
                 CollidingGameObject testObject = collidingObjects[j];
-                if (collidingObject.collidesWith(testObject)) {
-                    collidingObject.onCollision(testObject);
-                    testObject.onCollision(collidingObject);
+                Point collisionPoint = collidingObject.getCollisionPoint(testObject);
+                if (collisionPoint != null) {
+                    collidingObject.onCollision(testObject, collisionPoint);
+                    testObject.onCollision(collidingObject, collisionPoint);
                 }
             }
         }

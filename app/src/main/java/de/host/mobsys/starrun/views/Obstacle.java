@@ -1,6 +1,7 @@
 package de.host.mobsys.starrun.views;
 
 import android.graphics.Bitmap;
+import android.graphics.Point;
 
 import androidx.annotation.NonNull;
 
@@ -63,7 +64,7 @@ public class Obstacle extends BitmapObject {
     }
 
     @Override
-    public void onCollision(@NonNull CollidingGameObject other) {
+    public void onCollision(@NonNull CollidingGameObject other, Point point) {
         destroy();
     }
 }

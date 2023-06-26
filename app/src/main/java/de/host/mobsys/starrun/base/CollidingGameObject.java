@@ -5,7 +5,7 @@ import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import de.host.mobsys.starrun.base.collision.PolygonPixelIterator;
 import de.host.mobsys.starrun.base.size.Rect;
@@ -22,23 +22,29 @@ public interface CollidingGameObject {
 
     boolean containsCoordinates(int x, int y);
 
-    default boolean collidesWith(@NonNull CollidingGameObject other) {
+    /**
+     * @return null if no collision is detected between this and the other object.
+     */
+    default Point getCollisionPoint(@NonNull CollidingGameObject other) {
         Point[] intersectionPoints = getRect().intersectPx(other.getRect());
         if (intersectionPoints.length == 0) {
-            return false;
+            return null;
         }
 
-        AtomicBoolean result = new AtomicBoolean(false);
+        AtomicReference<Point> result = new AtomicReference<>(null);
         new PolygonPixelIterator().iteratePolygonPixels(intersectionPoints, (x, y) -> {
             boolean isColliding = containsCoordinates(x, y) && other.containsCoordinates(x, y);
-            result.set(isColliding);
+            if (isColliding) {
+                result.set(new Point(x, y));
+            }
+
             return isColliding;
         });
 
         return result.get();
     }
 
-    default void onCollision(@NonNull CollidingGameObject other) {
+    default void onCollision(@NonNull CollidingGameObject other, Point point) {
     }
 
     Rect getRect();
