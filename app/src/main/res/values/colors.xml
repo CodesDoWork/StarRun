@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primary">#17434b</color>
+    <color name="primaryVariant">#1f0e1c</color>
+    <color name="secondary">#7ec4c1</color>
+    <color name="secondaryVariant">#34859d</color>
+    <color name="accent">#f5edba</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

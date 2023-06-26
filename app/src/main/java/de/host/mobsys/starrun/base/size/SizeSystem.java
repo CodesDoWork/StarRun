@@ -1,5 +1,8 @@
 package de.host.mobsys.starrun.base.size;
 
+/**
+ * Class to convert values of different sizing systems to pixels.
+ */
 public abstract class SizeSystem {
 
     private static SizeSystem sizeSystem;

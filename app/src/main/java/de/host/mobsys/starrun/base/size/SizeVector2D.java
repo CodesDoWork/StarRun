@@ -1,5 +1,8 @@
 package de.host.mobsys.starrun.base.size;
 
+/**
+ * 2D vector with x and v values in units of the SizeSystem set.
+ */
 public class SizeVector2D {
 
     protected float x;

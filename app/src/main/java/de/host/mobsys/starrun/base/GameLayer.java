@@ -10,6 +10,9 @@ import java.util.ListIterator;
 
 import de.host.mobsys.starrun.base.size.Position;
 
+/**
+ * Layer with GameObjects to be added to a GameView.
+ */
 public class GameLayer {
 
     private final List<GameObject> gameObjects = new ArrayList<>();

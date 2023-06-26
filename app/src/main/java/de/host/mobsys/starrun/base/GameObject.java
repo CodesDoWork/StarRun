@@ -10,6 +10,10 @@ import java.util.List;
 import de.host.mobsys.starrun.base.physics.Velocity;
 import de.host.mobsys.starrun.base.size.Rect;
 
+/**
+ * This class represents a game entity. Any object inside a game inherits from this class and is
+ * added to a GameLayer.
+ */
 public abstract class GameObject implements GameTouchListener {
 
     protected final Rect rect;
