@@ -10,8 +10,12 @@ public class Size extends SizeVector2D {
         super(width, height);
     }
 
-    public static Size square(float width) {
+    public static Size squareFromWidth(float width) {
         return new Size(width, SizeSystem.getInstance().getHeightForSquareFromWidth(width));
+    }
+
+    public static Size squareFromHeight(float height) {
+        return new Size(SizeSystem.getInstance().getWidthForSquareFromHeight(height), height);
     }
 
     public static Size fromWidthAndHeight(float width, float height) {

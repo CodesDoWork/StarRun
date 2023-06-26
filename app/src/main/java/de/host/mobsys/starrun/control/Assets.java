@@ -3,6 +3,7 @@ package de.host.mobsys.starrun.control;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 
 import androidx.annotation.NonNull;
 
@@ -13,9 +14,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Assets {
 
-    public static final String ASTEROIDS_DIR = "asteroids";
-    public static final String BACKGROUND_DIR = "backgrounds";
-    public static final String PLAYER = "player.png";
+    public static final String ASTEROIDS_DIR = "img/obstacles";
+    public static final String BACKGROUND_DIR = "img/backgrounds";
+    public static final String PLAYER = "img/player.png";
+    public static final String FONT = "font/press_start_2p.ttf";
 
     private final AssetManager assetManager;
     private final Random random = new Random();
@@ -24,7 +26,7 @@ public class Assets {
         this.assetManager = assetManager;
     }
 
-    public Bitmap getRandomAsteroid() {
+    public Bitmap getRandomObstacle() {
         return readBitmap(getRandomAsset(ASTEROIDS_DIR));
     }
 
@@ -42,6 +44,10 @@ public class Assets {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Typeface readFont() {
+        return Typeface.createFromAsset(assetManager, FONT);
     }
 
     public Bitmap readBitmap(String name) {

@@ -7,9 +7,9 @@ import java.time.Duration;
  */
 class GameLoop {
 
+    private final GameLoopStatistics stats = new GameLoopStatistics();
     private final Duration targetFrameTime;
     private boolean isRunning = false;
-    private long lastFrameNanos = 0;
 
     private GameLoop(Duration targetFrameTime) {
         this.targetFrameTime = targetFrameTime;
@@ -27,24 +27,21 @@ class GameLoop {
         return new GameLoop(Duration.ofSeconds(1).dividedBy(targetFPS));
     }
 
-    @SuppressWarnings("BusyWait")
-    void start(OnUpdateListener onUpdateListener) {
+    void start(GameLoopListener gameLoopListener) {
         isRunning = true;
+        long lastUpdateNanos = System.nanoTime();
+        long lastFrameNanos = System.nanoTime();
         while (isRunning) {
-            Duration frameDuration = getDurationSinceLastFrame();
+            Duration elapsedTime = Duration.ofNanos(System.nanoTime() - lastUpdateNanos);
+            gameLoopListener.update(elapsedTime);
+            stats.onUpdate(elapsedTime);
+            lastUpdateNanos = System.nanoTime();
 
-            lastFrameNanos = System.nanoTime();
-            onUpdateListener.onUpdate(frameDuration);
-            Duration elapsedTime = Duration.ofNanos(System.nanoTime() - lastFrameNanos);
-
-            long waitTimeMillis = targetFrameTime.minus(elapsedTime).toMillis();
-            if (waitTimeMillis > 0) {
-                try {
-                    Thread.sleep(waitTimeMillis);
-                } catch (InterruptedException e) {
-                    stop();
-                    break;
-                }
+            Duration elapsedFrameTime = Duration.ofNanos(System.nanoTime() - lastFrameNanos);
+            if (targetFrameTime.compareTo(elapsedFrameTime) <= 0) {
+                gameLoopListener.draw();
+                stats.onDraw();
+                lastFrameNanos = System.nanoTime();
             }
         }
     }
@@ -53,14 +50,9 @@ class GameLoop {
         isRunning = false;
     }
 
-    private Duration getDurationSinceLastFrame() {
-        return lastFrameNanos == 0
-               ? Duration.ZERO
-               : Duration.ofNanos(System.nanoTime() - lastFrameNanos);
-    }
+    interface GameLoopListener {
+        void update(Duration elapsedTime);
 
-    @FunctionalInterface
-    interface OnUpdateListener {
-        void onUpdate(Duration frameDuration);
+        void draw();
     }
 }

@@ -24,6 +24,7 @@
       <option name="ALIGN_MULTILINE_TERNARY_OPERATION" value="true" />
       <option name="ALIGN_MULTILINE_PARENTHESIZED_EXPRESSION" value="true" />
       <option name="ALIGN_MULTILINE_ARRAY_INITIALIZER_EXPRESSION" value="true" />
+      <option name="SPACE_WITHIN_ARRAY_INITIALIZER_BRACES" value="true" />
       <option name="CALL_PARAMETERS_WRAP" value="5" />
       <option name="PREFER_PARAMETERS_WRAP" value="true" />
       <option name="CALL_PARAMETERS_LPAREN_ON_NEXT_LINE" value="true" />
@@ -52,7 +53,6 @@
       <option name="ARRAY_INITIALIZER_LBRACE_ON_NEXT_LINE" value="true" />
       <option name="ARRAY_INITIALIZER_RBRACE_ON_NEXT_LINE" value="true" />
       <option name="ASSIGNMENT_WRAP" value="1" />
-      <option name="PLACE_ASSIGNMENT_SIGN_ON_NEXT_LINE" value="true" />
       <option name="ASSERT_STATEMENT_WRAP" value="5" />
       <option name="IF_BRACE_FORCE" value="3" />
       <option name="DOWHILE_BRACE_FORCE" value="3" />
