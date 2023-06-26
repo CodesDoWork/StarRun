@@ -3,8 +3,6 @@ package de.host.mobsys.starrun;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.Display;
@@ -14,9 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Duration;
 
-import de.host.mobsys.starrun.animations.ExplosionAnimation;
+import de.host.mobsys.starrun.views.Animation;
 import de.host.mobsys.starrun.base.GameLayer;
 import de.host.mobsys.starrun.base.GameView;
 import de.host.mobsys.starrun.base.size.Position;
@@ -109,8 +106,15 @@ public class GameActivity extends AppCompatActivity {
         Player player = new Player(playerRect, loadAsset("ship_cut.png"));
         player.addOnMoveListener((x, y) -> backgroundLayer.translate(0, -y / 100));
         collisionLayer.add(player);
-        ExplosionAnimation explosionAnimation = new ExplosionAnimation(playerRect, loadAsset("explosion.png"));
-        animationLayer.add(explosionAnimation);
+        Animation animation = new Animation(
+            playerRect,
+            loadAsset("explosion.png"),
+            11,
+            320,
+            Size.fromWidthAndHeight(13, 11)
+        );
+        animation.startAnimation();
+        animationLayer.add(animation);
     }
 
     private void createScore() {
