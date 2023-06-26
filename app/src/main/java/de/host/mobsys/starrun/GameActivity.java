@@ -109,9 +109,9 @@ public class GameActivity extends AppCompatActivity {
         Animation animation = new Animation(
             playerRect,
             loadAsset("explosion.png"),
-            11,
+            12,
             320,
-            Size.fromWidthAndHeight(13, 11)
+            Size.fromWidthAndHeight(15, 15)
         );
         animation.startAnimation();
         //Remove the comment signs below to start the animation
