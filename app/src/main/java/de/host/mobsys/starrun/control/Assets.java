@@ -18,6 +18,7 @@ public class Assets {
     public static final String BACKGROUND_DIR = "img/backgrounds";
     public static final String PLAYER = "img/player.png";
     public static final String FONT = "font/press_start_2p.ttf";
+    public static final String EXPLOSION_ANIMATION = "animation/explosion.png";
 
     private final AssetManager assetManager;
     private final Random random = new Random();
@@ -36,6 +37,10 @@ public class Assets {
 
     public Bitmap getPlayerBitmap() {
         return readBitmap(PLAYER);
+    }
+
+    public Bitmap getExplosionAnimation() {
+        return readBitmap(EXPLOSION_ANIMATION);
     }
 
     public void readAsset(String name, @NonNull ReadAssetCallback callback) {
