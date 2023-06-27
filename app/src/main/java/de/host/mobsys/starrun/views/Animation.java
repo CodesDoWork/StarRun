@@ -46,7 +46,7 @@ public class Animation extends GameObject {
 
     /**
      * Starts the animation by initializing the necessary properties.
-     * This method should be called before starting the animation.
+     * This method should be called after creating the animation.
      */
     public void startAnimation() {
         frameWidth = spriteSheet.getWidth() / frameCount;
@@ -63,12 +63,13 @@ public class Animation extends GameObject {
             startTimeMillis = System.currentTimeMillis();
         }
 
-        currentFrameBitmap = createFrameBitmap(currentFrame);
-
-        if (currentFrame >= frameCount) {
+        if(currentFrame < frameCount) {
+            currentFrameBitmap = createFrameBitmap(currentFrame);
+        } else {
             // Animation finished
             destroy();
         }
+
     }
 
     /**
@@ -82,7 +83,10 @@ public class Animation extends GameObject {
 
         if (srcX + frameWidth <= spriteSheet.getWidth()) {
             Bitmap frameBitmap = Bitmap.createBitmap(spriteSheet, srcX, 0, frameWidth, frameHeight);
-            return BitmapUtils.scaleBitmap(frameBitmap, scalingSize);
+            Bitmap scaledBitmap = BitmapUtils.scaleBitmap(frameBitmap, scalingSize);
+
+            Matrix matrix = rect.position.getMatrix();
+            return Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true);
         } else {
             return null;
         }

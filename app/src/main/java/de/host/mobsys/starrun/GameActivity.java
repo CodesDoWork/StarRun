@@ -82,8 +82,8 @@ public class GameActivity extends AppCompatActivity {
 
         game.add(backgroundLayer);
         game.add(collisionLayer);
-        game.add(overlayLayer);
         game.add(animationLayer);
+        game.add(overlayLayer);
 
         createBackground();
         createPlayer();
@@ -110,7 +110,7 @@ public class GameActivity extends AppCompatActivity {
             playerRect,
             loadAsset("explosion.png"),
             12,
-            320,
+            300,
             Size.fromWidthAndHeight(15, 15)
         );
         animation.startAnimation();
