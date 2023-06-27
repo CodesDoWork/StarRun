@@ -10,12 +10,13 @@ import android.view.Display;
 
 import androidx.appcompat.app.AlertDialog;
 
+import de.host.mobsys.starrun.base.size.Size;
+import de.host.mobsys.starrun.views.Animation;
 import de.host.mobsys.starrun.base.GameLayer;
 import de.host.mobsys.starrun.base.GameView;
 import de.host.mobsys.starrun.base.size.BitmapUtils;
 import de.host.mobsys.starrun.base.size.Position;
 import de.host.mobsys.starrun.base.size.Rect;
-import de.host.mobsys.starrun.base.size.Size;
 import de.host.mobsys.starrun.base.size.SizeSystem;
 import de.host.mobsys.starrun.base.size.systems.PercentSizeSystem;
 import de.host.mobsys.starrun.base.views.Button;
@@ -32,6 +33,7 @@ public class GameActivity extends BaseActivity {
 
     private final GameLayer backgroundLayer = new GameLayer();
     private final GameLayer collisionLayer = new CollisionLayer();
+    private final GameLayer animationLayer = new GameLayer();
     private final GameLayer overlayLayer = new GameLayer();
 
     private final Handler handler = new Handler();
@@ -75,6 +77,7 @@ public class GameActivity extends BaseActivity {
 
         game.add(backgroundLayer);
         game.add(collisionLayer);
+        game.add(animationLayer);
         game.add(overlayLayer);
 
         createBackground();
@@ -100,6 +103,16 @@ public class GameActivity extends BaseActivity {
         player.addOnMoveListener((x, y) -> backgroundLayer.translate(0, -y / 100));
         player.addOnCollisionListener(this::gameOver);
         collisionLayer.add(player);
+        Animation animation = new Animation(
+            playerRect.position,
+            assets.getExplosionAnimation(),
+            12,
+            300,
+            Size.fromWidthAndHeight(15, 15)
+        );
+        animation.startAnimation();
+        //Remove the comment signs below to start the animation
+        //animationLayer.add(animation);
     }
 
     private void createObstacles() {
