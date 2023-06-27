@@ -8,17 +8,22 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.Display;
 
+import androidx.appcompat.app.AlertDialog;
+
 import de.host.mobsys.starrun.base.GameLayer;
 import de.host.mobsys.starrun.base.GameView;
 import de.host.mobsys.starrun.base.size.BitmapUtils;
 import de.host.mobsys.starrun.base.size.Position;
 import de.host.mobsys.starrun.base.size.Rect;
+import de.host.mobsys.starrun.base.size.Size;
 import de.host.mobsys.starrun.base.size.SizeSystem;
 import de.host.mobsys.starrun.base.size.systems.PercentSizeSystem;
+import de.host.mobsys.starrun.base.views.Button;
 import de.host.mobsys.starrun.base.views.CollisionLayer;
 import de.host.mobsys.starrun.base.views.TextObject;
 import de.host.mobsys.starrun.control.Assets;
 import de.host.mobsys.starrun.control.PreferenceInfo;
+import de.host.mobsys.starrun.databinding.PauseMenuBinding;
 import de.host.mobsys.starrun.views.Background;
 import de.host.mobsys.starrun.views.Obstacle;
 import de.host.mobsys.starrun.views.Player;
@@ -33,19 +38,24 @@ public class GameActivity extends BaseActivity {
 
     private GameView game;
     private Assets assets;
+    private AlertDialog menu = null;
 
     private int score = 0;
     private int highScore = 0;
     private TextObject scoreObject;
 
+    private boolean isRecreating = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        isRecreating = false;
 
         assets = new Assets(getResources().getAssets());
         highScore = storage.get(PreferenceInfo.HIGHSCORE);
 
         setupSizeSystem();
+        createMenuDialog();
         setupGame();
     }
 
@@ -71,6 +81,7 @@ public class GameActivity extends BaseActivity {
         createPlayer();
         createObstacles();
         createScore();
+        createMenuButton();
     }
 
     private void createBackground() {
@@ -110,7 +121,7 @@ public class GameActivity extends BaseActivity {
         scorePaint.setTypeface(assets.readFont());
         scorePaint.setColor(Color.WHITE);
 
-        scoreObject = new TextObject(new Position(5, 5), scorePaint);
+        scoreObject = new TextObject(new Position(65, 5), scorePaint);
         setScoreText();
         overlayLayer.add(scoreObject);
     }
@@ -122,19 +133,63 @@ public class GameActivity extends BaseActivity {
         ));
     }
 
+    private void createMenuButton() {
+        Position buttonPosition = new Position(90, 5);
+        Size buttonSize = Size.squareFromWidth(5);
+        Rect buttonRect = new Rect(buttonPosition, buttonSize);
+
+        Button menuButton = new Button(buttonRect, assets.getPauseButtonBitmap());
+        menuButton.addOnClickListener(this::pauseGame);
+        overlayLayer.add(menuButton);
+    }
+
     private void gameOver() {
         game.stop();
         saveHighScore();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        pauseGame();
+    }
+
+    @Override
+    public void onBackPressed() {
+        pauseGame();
+    }
+
+    private void pauseGame() {
+        game.stop();
+        game.saveState();
+        saveHighScore();
+        openMenu();
     }
 
     private void saveHighScore() {
         storage.set(PreferenceInfo.HIGHSCORE, Math.max(score, highScore));
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        saveHighScore();
+    private void openMenu() {
+        if (!menu.isShowing() && !isRecreating) {
+            menu.show();
+        }
+    }
+
+    private void createMenuDialog() {
+        PauseMenuBinding dialogBinding = PauseMenuBinding.inflate(getLayoutInflater());
+        dialogBinding.exit.setOnClickListener(v -> finish());
+        dialogBinding.restart.setOnClickListener(v -> {
+            isRecreating = true;
+            menu.dismiss();
+            recreate();
+        });
+
+        menu = createDialogBuilder()
+            .setMessage(getString(R.string.pause))
+            .setView(dialogBinding.getRoot())
+            .setOnDismissListener(v -> game.start())
+            .create();
     }
 }
 

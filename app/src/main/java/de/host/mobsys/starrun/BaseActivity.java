@@ -5,6 +5,9 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import de.host.mobsys.starrun.control.PreferenceStorage;
 
@@ -41,5 +44,10 @@ public class BaseActivity extends AppCompatActivity {
             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_FULLSCREEN
         );
+    }
+
+    protected MaterialAlertDialogBuilder createDialogBuilder() {
+        return new MaterialAlertDialogBuilder(this, R.style.materialAlertDialogStyle)
+            .setBackground(AppCompatResources.getDrawable(this, R.drawable.space_bit));
     }
 }

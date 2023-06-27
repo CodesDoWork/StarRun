@@ -16,6 +16,7 @@ public class Assets {
 
     public static final String ASTEROIDS_DIR = "img/obstacles";
     public static final String BACKGROUND_DIR = "img/backgrounds";
+    public static final String PAUSE_BUTTON = "img/pause_button.png";
     public static final String PLAYER = "img/player.png";
     public static final String FONT = "font/press_start_2p.ttf";
 
@@ -32,6 +33,10 @@ public class Assets {
 
     public Bitmap getRandomBackground() {
         return readBitmap(getRandomAsset(BACKGROUND_DIR));
+    }
+
+    public Bitmap getPauseButtonBitmap() {
+        return readBitmap(PAUSE_BUTTON);
     }
 
     public Bitmap getPlayerBitmap() {

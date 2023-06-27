@@ -86,6 +86,10 @@ public class Rect {
         }
     }
 
+    public boolean containsCoordinates(int x, int y) {
+        return getLeftPx() <= x && x <= getRightPx() && getTopPx() <= y && y <= getBottomPx();
+    }
+
     public Point[] intersectPx(Rect rect) {
         return IntersectionCalculator.computeIntersection(toPointsPx(), rect.toPointsPx());
     }

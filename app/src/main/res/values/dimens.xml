@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="windowPadding">24dp</dimen>
+    <dimen name="menuButtonWidth">240dp</dimen>
+
+</resources>
