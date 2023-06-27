@@ -8,6 +8,7 @@ import java.time.Duration;
 
 import de.host.mobsys.starrun.base.GameObject;
 import de.host.mobsys.starrun.base.size.BitmapUtils;
+import de.host.mobsys.starrun.base.size.Position;
 import de.host.mobsys.starrun.base.size.Rect;
 import de.host.mobsys.starrun.base.size.Size;
 
@@ -30,14 +31,14 @@ public class Animation extends GameObject {
     /**
      * Creates a new animation with the specified parameters.
      *
-     * @param rect                The limitations of the animation (position and size).
+     * @param position            The position of the animation.
      * @param spriteSheet         The sprite sheet that contains the frames of the animation.
      * @param frameCount          The number of frames in the sprite sheet.
      * @param frameDurationMillis The duration of a single frame in milliseconds.
      * @param scalingSize         The size to which the frames should be scaled.
      */
-    public Animation(Rect rect, Bitmap spriteSheet, int frameCount, int frameDurationMillis, Size scalingSize) {
-        super(rect);
+    public Animation(Position position, Bitmap spriteSheet, int frameCount, int frameDurationMillis, Size scalingSize) {
+        super(position);
         this.spriteSheet = spriteSheet;
         this.frameCount = frameCount;
         this.frameDurationMillis = frameDurationMillis;
@@ -85,7 +86,7 @@ public class Animation extends GameObject {
             Bitmap frameBitmap = Bitmap.createBitmap(spriteSheet, srcX, 0, frameWidth, frameHeight);
             Bitmap scaledBitmap = BitmapUtils.scaleBitmap(frameBitmap, scalingSize);
 
-            Matrix matrix = rect.position.getMatrix();
+            Matrix matrix = position.getMatrix();
             return Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true);
         } else {
             return null;
@@ -94,7 +95,7 @@ public class Animation extends GameObject {
 
     @Override
     public void draw(Canvas canvas) {
-        canvas.drawBitmap(currentFrameBitmap, rect.position.getMatrix(), null);
+        canvas.drawBitmap(currentFrameBitmap, position.getMatrix(), null);
     }
 }
 

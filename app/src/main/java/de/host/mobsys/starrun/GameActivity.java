@@ -3,18 +3,12 @@ package de.host.mobsys.starrun;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Display;
-import android.view.View;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import java.io.IOException;
-import java.io.InputStream;
-
+import de.host.mobsys.starrun.base.size.Size;
 import de.host.mobsys.starrun.views.Animation;
 import de.host.mobsys.starrun.base.GameLayer;
 import de.host.mobsys.starrun.base.GameView;
@@ -100,8 +94,8 @@ public class GameActivity extends BaseActivity {
         player.addOnCollisionListener(this::gameOver);
         collisionLayer.add(player);
         Animation animation = new Animation(
-            playerRect,
-            loadAsset("explosion.png"),
+            playerRect.position,
+            assets.getExplosionAnimation(),
             12,
             300,
             Size.fromWidthAndHeight(15, 15)
