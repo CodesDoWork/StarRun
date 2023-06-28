@@ -26,8 +26,8 @@ import de.host.mobsys.starrun.base.views.Button;
 import de.host.mobsys.starrun.base.views.CollisionLayer;
 import de.host.mobsys.starrun.base.views.TextObject;
 import de.host.mobsys.starrun.control.Assets;
-import de.host.mobsys.starrun.control.Sounds;
 import de.host.mobsys.starrun.control.PreferenceInfo;
+import de.host.mobsys.starrun.control.Sounds;
 import de.host.mobsys.starrun.databinding.PauseMenuBinding;
 import de.host.mobsys.starrun.models.Difficulty;
 import de.host.mobsys.starrun.models.Score;
@@ -183,6 +183,7 @@ public class GameActivity extends BaseActivity {
 
     private void createMenuDialog() {
         PauseMenuBinding dialogBinding = PauseMenuBinding.inflate(getLayoutInflater());
+        dialogBinding.resume.setOnClickListener(v -> menu.dismiss());
         dialogBinding.exit.setOnClickListener(v -> finish());
         dialogBinding.restart.setOnClickListener(v -> {
             isRecreating = true;
@@ -270,23 +271,6 @@ public class GameActivity extends BaseActivity {
     private void gameOver() {
         game.stop();
         score.save();
-    }
-
-    private void createMenuDialog() {
-        PauseMenuBinding dialogBinding = PauseMenuBinding.inflate(getLayoutInflater());
-        dialogBinding.resume.setOnClickListener(v -> menu.dismiss());
-        dialogBinding.exit.setOnClickListener(v -> finish());
-        dialogBinding.restart.setOnClickListener(v -> {
-            isRecreating = true;
-            menu.dismiss();
-            recreate();
-        });
-
-        menu = createDialogBuilder()
-            .setMessage(getString(R.string.pause))
-            .setView(dialogBinding.getRoot())
-            .setOnDismissListener(v -> startGame())
-            .create();
     }
 
     private Paint createPaint(float textSize) {
