@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog;
 import java.util.function.Predicate;
 
 import de.host.mobsys.starrun.base.GameLayer;
+import de.host.mobsys.starrun.base.GameObject;
 import de.host.mobsys.starrun.base.GameView;
 import de.host.mobsys.starrun.base.size.BitmapUtils;
 import de.host.mobsys.starrun.base.size.Position;
@@ -29,6 +30,7 @@ import de.host.mobsys.starrun.control.PreferenceInfo;
 import de.host.mobsys.starrun.control.Sounds;
 import de.host.mobsys.starrun.databinding.PauseMenuBinding;
 import de.host.mobsys.starrun.models.Difficulty;
+import de.host.mobsys.starrun.models.PowerUp;
 import de.host.mobsys.starrun.models.Score;
 import de.host.mobsys.starrun.views.Animation;
 import de.host.mobsys.starrun.views.Background;
@@ -120,7 +122,7 @@ public class GameActivity extends BaseActivity {
             new Position(5, 45),
             BitmapUtils.getSizeByWidth(playerSprite, 15)
         );
-        Player player = new Player(playerRect, playerSprite, difficulty, sounds);
+        Player player = new Player(playerRect, assets, difficulty, sounds);
         player.addOnMoveListener((x, y) -> backgroundLayer.translate(0, -y / 100));
         player.addOnDestroyListener(this::gameOver);
         collisionLayer.add(player);
@@ -141,10 +143,20 @@ public class GameActivity extends BaseActivity {
         if (!isFirst) {
             PowerUpView powerUpView = PowerUpView.createRandom(assets, difficulty, sounds);
             collisionLayer.add(powerUpView);
+            if (powerUpView.powerUp == PowerUp.Bomb) {
+                powerUpView.addOnCollisionListener((other, p) -> {
+                    if (other instanceof Player) {
+                        collisionLayer.getGameObjects()
+                                      .stream()
+                                      .filter(obj -> obj instanceof Obstacle)
+                                      .forEach(GameObject::destroy);
+                    }
+                });
+            }
         }
 
         if (game.isRunning()) {
-            handler.postDelayed(() -> createPowerUps(false), (int) (35_000 / difficulty.get()));
+            handler.postDelayed(() -> createPowerUps(false), (int) (25_000 / difficulty.get()));
         }
     }
 

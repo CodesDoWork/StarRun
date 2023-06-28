@@ -85,7 +85,7 @@ public class PowerUpView extends BitmapObject {
     public void onCollision(@NonNull CollidingGameObject other, Point point) {
         super.onCollision(other, point);
 
-        if (other instanceof Obstacle) {
+        if (!(other instanceof Player)) {
             sounds.playSound(R.raw.no_power_up);
         }
 

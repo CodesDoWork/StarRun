@@ -23,6 +23,7 @@ public class Assets {
     public static final String POWER_UP_BOMD = "img/power-ups/bomb.png";
     public static final String POWER_UP_SHIELD = "img/power-ups/shield.png";
     public static final String POWER_UP_SHRINK = "img/power-ups/shrink.png";
+    public static final String SHIELD = "img/shield.png";
 
     private final AssetManager assetManager;
     private final Random random = new Random();
@@ -45,6 +46,10 @@ public class Assets {
 
     public Bitmap getPlayerBitmap() {
         return readBitmap(PLAYER);
+    }
+
+    public Bitmap getShieldBitmap() {
+        return readBitmap(SHIELD);
     }
 
     public Bitmap getExplosionAnimation() {
