@@ -17,8 +17,8 @@ import de.host.mobsys.starrun.base.size.Position;
 public class GameLayer {
 
     protected final List<GameObject> gameObjects = new ArrayList<>();
-
     private final Position position = new Position(0, 0);
+    private Status status = Status.Enabled;
 
     public void add(GameObject gameObject) {
         gameObjects.add(gameObject);
@@ -26,13 +26,25 @@ public class GameLayer {
     }
 
     public void update(Duration elapsedTime) {
+        if (status != Status.Enabled) {
+            return;
+        }
+
         getGameObjects().forEach(gameObject -> gameObject.update(elapsedTime));
     }
 
     public void draw(Canvas canvas) {
+        if (status == Status.Disabled) {
+            return;
+        }
+
         canvas.translate(position.getXPx(), position.getYPx());
         getGameObjects().forEach(gameObject -> gameObject.draw(canvas));
         canvas.translate(-position.getXPx(), -position.getYPx());
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public void translate(float x, float y) {
@@ -69,5 +81,11 @@ public class GameLayer {
         return List.of(getGameObjects().stream()
                                        .filter(gameObject -> gameObject instanceof CollidingGameObject)
                                        .toArray(CollidingGameObject[]::new));
+    }
+
+    public enum Status {
+        Enabled,
+        DrawEnabled,
+        Disabled
     }
 }

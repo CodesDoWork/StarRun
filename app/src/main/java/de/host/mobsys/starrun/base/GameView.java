@@ -103,6 +103,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Vie
         draw(canvas);
     }
 
+    public List<GameLayer> getLayers() {
+        return new ArrayList<>(layers);
+    }
+
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
         if (savedStateBitmap != null) {

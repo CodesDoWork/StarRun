@@ -5,14 +5,13 @@ import android.graphics.Paint;
 
 import de.host.mobsys.starrun.base.GameObject;
 import de.host.mobsys.starrun.base.size.Position;
+import de.host.mobsys.starrun.base.size.SizeSystem;
 
 public class TextObject extends GameObject {
 
-    private final Paint paint;
-    private final float lineHeight;
-    private final float textSize;
+    protected final Paint paint;
 
-    private String text;
+    protected String text;
 
     public TextObject(Position position, Paint paint) {
         this(position, paint, "");
@@ -22,14 +21,13 @@ public class TextObject extends GameObject {
         super(position);
         this.paint = paint;
         this.text = text;
-
-        Paint.FontMetrics fontMetrics = paint.getFontMetrics();
-        lineHeight = fontMetrics.descent - fontMetrics.ascent;
-        textSize = paint.getTextSize();
     }
 
     @Override
     public void draw(Canvas canvas) {
+        Paint.FontMetrics fontMetrics = paint.getFontMetrics();
+        float lineHeight = fontMetrics.descent - fontMetrics.ascent;
+        float textSize = paint.getTextSize();
         float textX = position.getXPx();
         float textY = position.getYPx() + textSize;
 
@@ -41,5 +39,16 @@ public class TextObject extends GameObject {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    protected float getTextWidth() {
+        float[] widths = new float[text.length()];
+        paint.getTextWidths(text, widths);
+        float totalWidth = 0;
+        for (float width : widths) {
+            totalWidth += width;
+        }
+
+        return SizeSystem.getInstance().widthFromPx(Math.round(totalWidth));
     }
 }
