@@ -1,16 +1,12 @@
 package de.host.mobsys.starrun.views;
 
 import android.graphics.Bitmap;
-import android.graphics.Point;
 import android.view.MotionEvent;
-
-import androidx.annotation.NonNull;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.host.mobsys.starrun.base.CollidingGameObject;
 import de.host.mobsys.starrun.base.physics.Velocity;
 import de.host.mobsys.starrun.base.physics.VelocityBuilder;
 import de.host.mobsys.starrun.base.size.Rect;
@@ -22,7 +18,6 @@ public class Player extends BitmapObject {
     private static final float DOWN_SPEED = 35;
 
     private final List<OnMoveListener> onMoveListeners = new ArrayList<>();
-    private final List<OnCollisionListener> onCollisionListeners = new ArrayList<>();
 
     private Velocity down = new VelocityBuilder().down(DOWN_SPEED).build();
     private Velocity up = new VelocityBuilder().up(UP_SPEED).build();
@@ -60,26 +55,12 @@ public class Player extends BitmapObject {
         }
     }
 
-    @Override
-    public void onCollision(@NonNull CollidingGameObject other, Point point) {
-        onCollisionListeners.forEach(OnCollisionListener::onCollision);
-    }
-
     public void addOnMoveListener(OnMoveListener listener) {
         onMoveListeners.add(listener);
-    }
-
-    public void addOnCollisionListener(OnCollisionListener listener) {
-        onCollisionListeners.add(listener);
     }
 
     @FunctionalInterface
     public interface OnMoveListener {
         void onMove(float x, float y);
-    }
-
-    @FunctionalInterface
-    public interface OnCollisionListener {
-        void onCollision();
     }
 }

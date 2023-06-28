@@ -101,6 +101,7 @@ public class Obstacle extends BitmapObject {
 
     @Override
     public void onCollision(@NonNull CollidingGameObject other, Point point) {
+        super.onCollision(other, point);
         destroy();
     }
 }

@@ -3,9 +3,14 @@ package de.host.mobsys.starrun.base.views;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 
+import androidx.annotation.NonNull;
+
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.host.mobsys.starrun.base.CollidingGameObject;
 import de.host.mobsys.starrun.base.GameObject;
@@ -23,6 +28,8 @@ public class BitmapObject extends GameObject implements CollidingGameObject {
     protected final Bitmap sprite;
     private final Bitmap fullscreenBitmap;
     private final Canvas objectOnly;
+
+    private final List<OnCollisionListener> onCollisionListeners = new ArrayList<>();
 
     protected Velocity1D rotationSpeed = Velocity1D.ZERO;
 
@@ -70,5 +77,19 @@ public class BitmapObject extends GameObject implements CollidingGameObject {
 
     public void setRotation(float rotation) {
         rect.setRotation(rotation);
+    }
+
+    @Override
+    public void onCollision(@NonNull CollidingGameObject other, Point point) {
+        onCollisionListeners.forEach(listener -> listener.onCollision(point));
+    }
+
+    public void addOnCollisionListener(OnCollisionListener listener) {
+        onCollisionListeners.add(listener);
+    }
+
+    @FunctionalInterface
+    public interface OnCollisionListener {
+        void onCollision(Point point);
     }
 }

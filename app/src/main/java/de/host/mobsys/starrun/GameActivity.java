@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Display;
 
 import androidx.appcompat.app.AlertDialog;
@@ -24,6 +25,7 @@ import de.host.mobsys.starrun.base.views.Button;
 import de.host.mobsys.starrun.base.views.CollisionLayer;
 import de.host.mobsys.starrun.base.views.TextObject;
 import de.host.mobsys.starrun.control.Assets;
+import de.host.mobsys.starrun.control.Sounds;
 import de.host.mobsys.starrun.databinding.PauseMenuBinding;
 import de.host.mobsys.starrun.models.Difficulty;
 import de.host.mobsys.starrun.models.Score;
@@ -47,6 +49,7 @@ public class GameActivity extends BaseActivity {
     private GameView game;
     private Score score;
     private Assets assets;
+    private Sounds sounds;
     private AlertDialog menu = null;
 
     private TextObject scoreObject;
@@ -61,6 +64,7 @@ public class GameActivity extends BaseActivity {
         score = new Score(storage);
         score.addChangeListener(difficulty::setFromScore);
         assets = new Assets(getResources().getAssets());
+        sounds = new Sounds(this);
 
         setupSizeSystem();
         createMenuDialog();
@@ -106,7 +110,7 @@ public class GameActivity extends BaseActivity {
         );
         Player player = new Player(playerRect, playerSprite, difficulty);
         player.addOnMoveListener((x, y) -> backgroundLayer.translate(0, -y / 100));
-        player.addOnCollisionListener(this::gameOver);
+        player.addOnCollisionListener(p -> gameOver());
         collisionLayer.add(player);
 
         Animation animation = new Animation(
@@ -123,6 +127,10 @@ public class GameActivity extends BaseActivity {
 
     private void createObstacles() {
         Obstacle obstacle = Obstacle.createRandom(assets, difficulty);
+        obstacle.addOnCollisionListener(p -> {
+            Log.d("COLLISION", "collision at: " + p.x + ", " + p.y);
+            sounds.playSound(R.raw.explosion);
+        });
         obstacle.addOnDestroyListener(() -> {
             if (obstacle.getRect().getLeftPx() < 0) {
                 score.increment();
@@ -188,6 +196,24 @@ public class GameActivity extends BaseActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        sounds.resumeMusic();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        sounds.pauseMusic();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        sounds.release();
+    }
+
+    @Override
     public void onBackPressed() {
         pauseGame();
     }
@@ -200,9 +226,12 @@ public class GameActivity extends BaseActivity {
     private void countdown() {
         setLayerStatusIf(layer -> layer != countdownLayer, GameLayer.Status.DrawEnabled);
 
-        Countdown countdown = new Countdown(new Position(50, 50), createPaint(120));
+        Countdown countdown = new Countdown(new Position(50, 50), createPaint(120), sounds);
         countdown.addOnDestroyListener(() -> {
             setLayerStatusIf(layer -> layer != countdownLayer, GameLayer.Status.Enabled);
+            if (!sounds.isMusicPlaying()) {
+                sounds.playMusic(R.raw.game_music);
+            }
             createObstacles();
         });
         countdownLayer.add(countdown);
