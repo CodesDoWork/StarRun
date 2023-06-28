@@ -18,8 +18,8 @@ import de.host.mobsys.starrun.base.views.BitmapObject;
 import de.host.mobsys.starrun.models.Difficulty;
 
 public class Player extends BitmapObject {
-    private static final float UP_SPEED = 60;
-    private static final float DOWN_SPEED = 35;
+    private static final float UP_SPEED = 70;
+    private static final float DOWN_SPEED = 40;
 
     private final List<OnMoveListener> onMoveListeners = new ArrayList<>();
     private final List<OnCollisionListener> onCollisionListeners = new ArrayList<>();
