@@ -24,7 +24,6 @@ public class Player extends BitmapObject {
     private final List<OnMoveListener> onMoveListeners = new ArrayList<>();
     private final List<OnCollisionListener> onCollisionListeners = new ArrayList<>();
     private boolean isAnimationPlaying = false;
-    private Velocity originalVelocity;
 
 
     private Velocity down = new VelocityBuilder().down(DOWN_SPEED).build();
