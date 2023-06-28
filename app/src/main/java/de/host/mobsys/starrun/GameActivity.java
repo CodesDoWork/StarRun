@@ -54,7 +54,11 @@ public class GameActivity extends BaseActivity {
         isRecreating = false;
 
         assets = new Assets(getResources().getAssets());
-        highScore = storage.get(PreferenceInfo.HIGHSCORE);
+
+        // only update if unset
+        if (highScore == 0) {
+            highScore = storage.get(PreferenceInfo.HIGHSCORE);
+        }
 
         setupSizeSystem();
         createMenuDialog();
