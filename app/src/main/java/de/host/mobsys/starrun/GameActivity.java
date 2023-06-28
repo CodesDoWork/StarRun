@@ -22,6 +22,7 @@ import de.host.mobsys.starrun.base.views.Button;
 import de.host.mobsys.starrun.base.views.CollisionLayer;
 import de.host.mobsys.starrun.base.views.TextObject;
 import de.host.mobsys.starrun.control.Assets;
+import de.host.mobsys.starrun.control.PreferenceInfo;
 import de.host.mobsys.starrun.databinding.PauseMenuBinding;
 import de.host.mobsys.starrun.models.Difficulty;
 import de.host.mobsys.starrun.models.Score;
@@ -41,10 +42,11 @@ public class GameActivity extends BaseActivity {
     private final Difficulty difficulty = new Difficulty();
 
     private GameView game;
-    private Score score;
     private Assets assets;
-    private AlertDialog menu = null;
+    private Score score;
+    private int highScore = 0;
 
+    private AlertDialog menu = null;
     private TextObject scoreObject;
 
     private boolean isRecreating = false;
@@ -58,6 +60,11 @@ public class GameActivity extends BaseActivity {
         score.addChangeListener(difficulty::setFromScore);
         assets = new Assets(getResources().getAssets());
 
+        // only update if unset
+        if (highScore == 0) {
+            highScore = storage.get(PreferenceInfo.HIGHSCORE);
+        }
+
         setupSizeSystem();
         createMenuDialog();
         setupGame();
@@ -67,9 +74,11 @@ public class GameActivity extends BaseActivity {
     private void setupSizeSystem() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
-        display.getRealSize(size);
+        Point realSize = new Point();
+        display.getSize(size);
+        display.getRealSize(realSize);
 
-        SizeSystem.setup(size.x, size.y);
+        SizeSystem.setup(size.x, Math.max(size.y, realSize.y));
         SizeSystem.setSizeSystem(new PercentSizeSystem());
     }
 
@@ -133,12 +142,12 @@ public class GameActivity extends BaseActivity {
 
     private void createScore() {
         Paint scorePaint = new Paint();
-        scorePaint.setTextSize(28);
+        scorePaint.setTextSize(SizeSystem.getInstance().heightToPx(2.75f));
         scorePaint.setAntiAlias(true);
         scorePaint.setTypeface(assets.readFont());
         scorePaint.setColor(Color.WHITE);
 
-        scoreObject = new TextObject(new Position(65, 5), scorePaint);
+        scoreObject = new TextObject(new Position(62.5f, 5), scorePaint);
         setScoreText();
         overlayLayer.add(scoreObject);
     }
@@ -196,6 +205,7 @@ public class GameActivity extends BaseActivity {
 
     private void createMenuDialog() {
         PauseMenuBinding dialogBinding = PauseMenuBinding.inflate(getLayoutInflater());
+        dialogBinding.resume.setOnClickListener(v -> menu.dismiss());
         dialogBinding.exit.setOnClickListener(v -> finish());
         dialogBinding.restart.setOnClickListener(v -> {
             isRecreating = true;
