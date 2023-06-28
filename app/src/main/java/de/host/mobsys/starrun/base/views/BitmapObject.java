@@ -28,6 +28,7 @@ public class BitmapObject extends GameObject implements CollidingGameObject {
     private final Bitmap fullscreenBitmap;
     private final Canvas objectOnly;
     private final List<OnCollisionListener> onCollisionListeners = new ArrayList<>();
+
     protected Bitmap originalSprite;
     protected Bitmap sprite;
     protected Velocity1D rotationSpeed = Velocity1D.ZERO;

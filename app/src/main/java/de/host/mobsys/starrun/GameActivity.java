@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.view.Display;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 
 import java.util.function.Predicate;
 
@@ -28,6 +29,7 @@ import de.host.mobsys.starrun.base.views.TextObject;
 import de.host.mobsys.starrun.control.Assets;
 import de.host.mobsys.starrun.control.PreferenceInfo;
 import de.host.mobsys.starrun.control.Sounds;
+import de.host.mobsys.starrun.databinding.GameOverBinding;
 import de.host.mobsys.starrun.databinding.PauseMenuBinding;
 import de.host.mobsys.starrun.models.Difficulty;
 import de.host.mobsys.starrun.models.PowerUp;
@@ -61,6 +63,8 @@ public class GameActivity extends BaseActivity {
     private TextObject scoreObject;
 
     private boolean isRecreating = false;
+    private Player player;
+    private Rect playerRect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,25 +122,15 @@ public class GameActivity extends BaseActivity {
 
     private void createPlayer() {
         Bitmap playerSprite = assets.getPlayerBitmap();
-        Rect playerRect = new Rect(
+
+        playerRect = new Rect(
             new Position(5, 45),
             BitmapUtils.getSizeByWidth(playerSprite, 15)
         );
-        Player player = new Player(playerRect, assets, difficulty, sounds);
+        player = new Player(playerRect, assets, difficulty, sounds);
         player.addOnMoveListener((x, y) -> backgroundLayer.translate(0, -y / 100));
         player.addOnDestroyListener(this::gameOver);
         collisionLayer.add(player);
-
-        Animation animation = new Animation(
-            playerRect.position,
-            assets.getExplosionAnimation(),
-            12,
-            300,
-            Size.fromWidthAndHeight(15, 15)
-        );
-        animation.startAnimation();
-        //Remove the comment signs below to start the animation
-        //animationLayer.add(animation);
     }
 
     private void createPowerUps(boolean isFirst) {
@@ -290,8 +284,41 @@ public class GameActivity extends BaseActivity {
     }
 
     private void gameOver() {
-        game.stop();
-        score.save();
+        Animation animation = new Animation(
+            playerRect.position,
+            assets.getExplosionAnimation(),
+            12,
+            300,
+            Size.fromWidthAndHeight(15, 15)
+        );
+        animation.startAnimation();
+        animationLayer.add(animation);
+        if (player != null) {
+            player.setAnimationPlaying(true); // Stop player movement
+        }
+        handler.postDelayed(() -> {
+            game.stop();
+            score.save();
+            createGameOverDialog();
+            openMenu();
+        }, 2700);
+    }
+
+    private void createGameOverDialog() {
+        GameOverBinding gameOverBinding = GameOverBinding.inflate(getLayoutInflater());
+        gameOverBinding.exit.setOnClickListener(v -> finish());
+        gameOverBinding.restart.setOnClickListener(v -> {
+            isRecreating = true;
+            menu.dismiss();
+            recreate();
+        });
+
+        menu = createDialogBuilder()
+            .setMessage(getString(R.string.game_over))
+            .setView(gameOverBinding.getRoot())
+            .setBackground(ContextCompat.getDrawable(this, R.drawable.game_over))
+            .setCancelable(false)
+            .create();
     }
 
     private Paint createPaint(float textSize) {

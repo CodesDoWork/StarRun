@@ -25,8 +25,8 @@ import de.host.mobsys.starrun.models.Difficulty;
 import de.host.mobsys.starrun.models.PowerUp;
 
 public class Player extends BitmapObject {
-    private static final float UP_SPEED = 60;
-    private static final float DOWN_SPEED = 35;
+    private static final float UP_SPEED = 70;
+    private static final float DOWN_SPEED = 40;
     private static final Duration SHIELD_DURATION = Duration.ofSeconds(10);
     private static final Duration SHRINK_DURATION = Duration.ofSeconds(10);
     private static final float SHRINK_FACTOR = 2;
@@ -42,6 +42,7 @@ public class Player extends BitmapObject {
 
     private Duration remainingShieldDuration = Duration.ZERO;
     private Duration remainingShrinkDuration = Duration.ZERO;
+    private boolean isAnimationPlaying = false;
 
     public Player(Rect rect, Assets assets, Difficulty difficulty, Sounds sounds) {
         super(rect, assets.getPlayerBitmap());
@@ -57,6 +58,13 @@ public class Player extends BitmapObject {
         });
     }
 
+    public void setAnimationPlaying(boolean animationPlaying) {
+        isAnimationPlaying = animationPlaying;
+        if (animationPlaying) {
+            velocity = Velocity.ZERO;
+        }
+    }
+
     private boolean hasShield() {
         return !(remainingShieldDuration.isNegative() || remainingShieldDuration.isZero());
     }
@@ -67,13 +75,15 @@ public class Player extends BitmapObject {
 
     @Override
     public void update(Duration elapsedTime) {
-        float y = rect.getTop();
-        super.update(elapsedTime);
-        rect.ensureInScreen();
+        if (!isAnimationPlaying) {
+            float y = rect.getTop();
+            super.update(elapsedTime);
+            rect.ensureInScreen();
 
-        float moved = rect.getTop() - y;
-        if (moved != 0) {
-            onMoveListeners.forEach(listener -> listener.onMove(0, moved));
+            float moved = rect.getTop() - y;
+            if (moved != 0) {
+                onMoveListeners.forEach(listener -> listener.onMove(0, moved));
+            }
         }
 
         boolean wasShrunk = isShrunk();
