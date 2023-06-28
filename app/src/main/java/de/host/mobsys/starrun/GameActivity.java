@@ -1,5 +1,6 @@
 package de.host.mobsys.starrun;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -152,6 +153,7 @@ public class GameActivity extends BaseActivity {
         overlayLayer.add(scoreObject);
     }
 
+    @SuppressLint("StringFormatInvalid")
     private void setScoreText() {
         scoreObject.setText(getString(R.string.score, score.getScore()) + "\n" + getString(
             R.string.highscore,
