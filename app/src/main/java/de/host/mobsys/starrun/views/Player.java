@@ -2,6 +2,7 @@ package de.host.mobsys.starrun.views;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.view.MotionEvent;
 
@@ -92,7 +93,9 @@ public class Player extends SpriteSheetObject {
     public void draw(Canvas canvas) {
         super.draw(canvas);
         if (hasShield()) {
-            canvas.drawBitmap(shieldSprite, rect.getMatrix(), null);
+            Matrix spriteMatrix = rect.getMatrix();
+            spriteMatrix.preTranslate(0, -rect.size.getYPx() / 2f);
+            canvas.drawBitmap(shieldSprite, spriteMatrix, null);
         }
     }
 
