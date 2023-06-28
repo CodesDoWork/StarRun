@@ -81,7 +81,7 @@ public class BitmapObject extends GameObject implements CollidingGameObject {
 
     @Override
     public void onCollision(@NonNull CollidingGameObject other, Point point) {
-        onCollisionListeners.forEach(listener -> listener.onCollision(point));
+        onCollisionListeners.forEach(listener -> listener.onCollision(other, point));
     }
 
     public void addOnCollisionListener(OnCollisionListener listener) {
@@ -90,6 +90,6 @@ public class BitmapObject extends GameObject implements CollidingGameObject {
 
     @FunctionalInterface
     public interface OnCollisionListener {
-        void onCollision(Point point);
+        void onCollision(@NonNull CollidingGameObject other, Point point);
     }
 }

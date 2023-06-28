@@ -16,10 +16,13 @@ public class Assets {
 
     public static final String ASTEROIDS_DIR = "img/obstacles";
     public static final String BACKGROUND_DIR = "img/backgrounds";
+    public static final String EXPLOSION_ANIMATION = "animation/explosion.png";
+    public static final String FONT = "font/press_start_2p.ttf";
     public static final String PAUSE_BUTTON = "img/pause_button.png";
     public static final String PLAYER = "img/player.png";
-    public static final String FONT = "font/press_start_2p.ttf";
-    public static final String EXPLOSION_ANIMATION = "animation/explosion.png";
+    public static final String POWER_UP_BOMD = "img/power-ups/bomb.png";
+    public static final String POWER_UP_SHIELD = "img/power-ups/shield.png";
+    public static final String POWER_UP_SHRINK = "img/power-ups/shrink.png";
 
     private final AssetManager assetManager;
     private final Random random = new Random();

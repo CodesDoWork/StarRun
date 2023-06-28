@@ -48,6 +48,6 @@ public class BaseActivity extends AppCompatActivity {
 
     protected MaterialAlertDialogBuilder createDialogBuilder() {
         return new MaterialAlertDialogBuilder(this, R.style.materialAlertDialogStyle)
-            .setBackground(AppCompatResources.getDrawable(this, R.drawable.space_bit));
+            .setBackground(AppCompatResources.getDrawable(this, R.drawable.menu_background));
     }
 }

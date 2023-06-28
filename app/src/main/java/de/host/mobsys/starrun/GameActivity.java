@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Display;
 
 import androidx.appcompat.app.AlertDialog;
@@ -36,6 +35,7 @@ import de.host.mobsys.starrun.views.Background;
 import de.host.mobsys.starrun.views.Countdown;
 import de.host.mobsys.starrun.views.Obstacle;
 import de.host.mobsys.starrun.views.Player;
+import de.host.mobsys.starrun.views.PowerUpView;
 
 public class GameActivity extends BaseActivity {
 
@@ -122,7 +122,13 @@ public class GameActivity extends BaseActivity {
         );
         Player player = new Player(playerRect, playerSprite, difficulty);
         player.addOnMoveListener((x, y) -> backgroundLayer.translate(0, -y / 100));
-        player.addOnCollisionListener(p -> gameOver());
+        player.addOnCollisionListener((obj, p) -> {
+            if (obj instanceof Obstacle) {
+                gameOver();
+            } else {
+                // power up;
+            }
+        });
         collisionLayer.add(player);
 
         Animation animation = new Animation(
@@ -137,12 +143,21 @@ public class GameActivity extends BaseActivity {
         //animationLayer.add(animation);
     }
 
+    private void createPowerUps(boolean isFirst) {
+        if (!isFirst) {
+            PowerUpView powerUpView = PowerUpView.createRandom(assets, difficulty);
+            powerUpView.addOnCollisionListener((obj, p) -> sounds.playSound(R.raw.explosion));
+            collisionLayer.add(powerUpView);
+        }
+
+        if (game.isRunning()) {
+            handler.postDelayed(() -> createPowerUps(false), (int) (17500 / difficulty.get()));
+        }
+    }
+
     private void createObstacles() {
         Obstacle obstacle = Obstacle.createRandom(assets, difficulty);
-        obstacle.addOnCollisionListener(p -> {
-            Log.d("COLLISION", "collision at: " + p.x + ", " + p.y);
-            sounds.playSound(R.raw.explosion);
-        });
+        obstacle.addOnCollisionListener((obj, p) -> sounds.playSound(R.raw.explosion));
         obstacle.addOnDestroyListener(() -> {
             if (obstacle.getRect().getLeftPx() < 0) {
                 score.increment();
@@ -247,7 +262,9 @@ public class GameActivity extends BaseActivity {
             if (!sounds.isMusicPlaying()) {
                 sounds.playMusic(R.raw.game_music);
             }
+
             createObstacles();
+            createPowerUps(true);
         });
         countdownLayer.add(countdown);
         countdown.start(3);
