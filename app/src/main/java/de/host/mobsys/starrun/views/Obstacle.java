@@ -2,10 +2,13 @@ package de.host.mobsys.starrun.views;
 
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import de.host.mobsys.starrun.base.CollidingGameObject;
@@ -17,31 +20,53 @@ import de.host.mobsys.starrun.base.size.Rect;
 import de.host.mobsys.starrun.base.views.BitmapObject;
 import de.host.mobsys.starrun.control.Assets;
 import de.host.mobsys.starrun.control.RandomUtils;
+import de.host.mobsys.starrun.models.Difficulty;
 
 public class Obstacle extends BitmapObject {
+
+    private static final List<Rect> lastObstacleSpawns = new ArrayList<>();
 
     private Obstacle(Rect rect, Bitmap sprite) {
         super(rect, sprite);
     }
 
-    public static Obstacle createRandom(Assets assets) {
+    /**
+     * Creates a new Obstacle with random properties.
+     *
+     * @param assets     Assets to get a random obstacle sprite
+     * @param difficulty Difficulty to enable difficulty adjustments
+     * @return The created Obstacle
+     */
+    public static Obstacle createRandom(Assets assets, Difficulty difficulty) {
         Random random = new Random();
         Bitmap sprite = assets.getRandomObstacle();
 
-        int minHeight = 5;
-        int maxHeight = 25;
+        float minHeight = 5 * difficulty.getHalf();
+        float maxHeight = 25;
         float height = RandomUtils.between(minHeight, maxHeight);
 
-        float minY = minHeight - height;
-        float maxY = 100 - minHeight;
-        float y = RandomUtils.between(minY, maxY);
-        Position position = new Position(100, y);
-        Rect rect = new Rect(position, BitmapUtils.getSizeByHeight(sprite, height));
-        Obstacle obstacle = new Obstacle(rect, sprite);
+        float minY = 2 + minHeight - height;
+        float maxY = 98 - minHeight;
 
-        int minSpeed = 4;
-        int maxSpeed = 20;
-        float speed = RandomUtils.between(minSpeed, maxSpeed);
+        Rect rect;
+        int tries = 0;
+        int maxTries = 3;
+        do {
+            float y = RandomUtils.between(minY, maxY);
+            Position position = new Position(100, y);
+            rect = new Rect(position, BitmapUtils.getSizeByHeight(sprite, height));
+        } while (++tries < maxTries && isCollidingSpawningArea(rect));
+        Obstacle obstacle = new Obstacle(rect, sprite);
+        Log.d("OBSTACLE", "Tries: " + tries);
+
+        lastObstacleSpawns.add(rect);
+        if (lastObstacleSpawns.size() > 3) {
+            lastObstacleSpawns.remove(0);
+        }
+
+        float minSpeed = 4 * difficulty.getHalf();
+        float maxSpeed = 22.5f - height / 3f;
+        float speed = RandomUtils.between(minSpeed, maxSpeed) * difficulty.get();
         obstacle.setVelocity(new VelocityBuilder().left(speed).build());
 
         obstacle.setRotation(RandomUtils.between(0, 360));
@@ -53,6 +78,17 @@ public class Obstacle extends BitmapObject {
         obstacle.rotationSpeed = new Velocity1D(spin);
 
         return obstacle;
+    }
+
+    private static boolean isCollidingSpawningArea(Rect rect) {
+        for (Rect lastObstacleSpawn : lastObstacleSpawns) {
+            if (rect.getTop() <= lastObstacleSpawn.getBottom()
+                && rect.getBottom() >= lastObstacleSpawn.getTop()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
