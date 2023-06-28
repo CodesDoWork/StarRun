@@ -7,4 +7,5 @@
     <string name="restart">Restart</string>
     <string name="resume">Resume</string>
     <string name="score">Score: %d</string>
+    <string name="game_over">Game Over</string>
 </resources>

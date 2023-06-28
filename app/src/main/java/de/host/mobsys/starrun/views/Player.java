@@ -23,6 +23,8 @@ public class Player extends BitmapObject {
 
     private final List<OnMoveListener> onMoveListeners = new ArrayList<>();
     private final List<OnCollisionListener> onCollisionListeners = new ArrayList<>();
+    private boolean isAnimationPlaying = false;
+
 
     private Velocity down = new VelocityBuilder().down(DOWN_SPEED).build();
     private Velocity up = new VelocityBuilder().up(UP_SPEED).build();
@@ -37,15 +39,24 @@ public class Player extends BitmapObject {
         });
     }
 
+    public void setAnimationPlaying(boolean animationPlaying) {
+        isAnimationPlaying = animationPlaying;
+        if (animationPlaying) {
+            velocity = new Velocity(0, 0); // Set velocity to stop the player
+        }
+    }
+
     @Override
     public void update(Duration elapsedTime) {
-        float y = rect.getTop();
-        super.update(elapsedTime);
-        rect.ensureInScreen();
+        if (!isAnimationPlaying) {
+            float y = rect.getTop();
+            super.update(elapsedTime);
+            rect.ensureInScreen();
 
-        float moved = rect.getTop() - y;
-        if (moved != 0) {
-            onMoveListeners.forEach(listener -> listener.onMove(0, moved));
+            float moved = rect.getTop() - y;
+            if (moved != 0) {
+                onMoveListeners.forEach(listener -> listener.onMove(0, moved));
+            }
         }
     }
 
@@ -76,10 +87,5 @@ public class Player extends BitmapObject {
     @FunctionalInterface
     public interface OnMoveListener {
         void onMove(float x, float y);
-    }
-
-    @FunctionalInterface
-    public interface OnCollisionListener {
-        void onCollision();
     }
 }
