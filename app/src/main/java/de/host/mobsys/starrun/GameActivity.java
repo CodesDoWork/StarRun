@@ -12,10 +12,10 @@ import android.view.Display;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
+import java.time.Duration;
 import java.util.function.Predicate;
 
 import de.host.mobsys.starrun.base.GameLayer;
-import de.host.mobsys.starrun.base.GameObject;
 import de.host.mobsys.starrun.base.GameView;
 import de.host.mobsys.starrun.base.size.BitmapUtils;
 import de.host.mobsys.starrun.base.size.Position;
@@ -34,7 +34,7 @@ import de.host.mobsys.starrun.databinding.PauseMenuBinding;
 import de.host.mobsys.starrun.models.Difficulty;
 import de.host.mobsys.starrun.models.PowerUp;
 import de.host.mobsys.starrun.models.Score;
-import de.host.mobsys.starrun.views.Animation;
+import de.host.mobsys.starrun.models.SpriteSheetObject;
 import de.host.mobsys.starrun.views.Background;
 import de.host.mobsys.starrun.views.Countdown;
 import de.host.mobsys.starrun.views.Obstacle;
@@ -60,11 +60,11 @@ public class GameActivity extends BaseActivity {
     private int highScore = 0;
 
     private AlertDialog menu = null;
+    private AlertDialog gameOverMenu = null;
     private TextObject scoreObject;
 
     private boolean isRecreating = false;
     private Player player;
-    private Rect playerRect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +84,7 @@ public class GameActivity extends BaseActivity {
 
         setupSizeSystem();
         createMenuDialog();
+        createGameOverDialog();
         setupGame();
         startGame();
     }
@@ -123,7 +124,7 @@ public class GameActivity extends BaseActivity {
     private void createPlayer() {
         Bitmap playerSprite = assets.getPlayerBitmap();
 
-        playerRect = new Rect(
+        Rect playerRect = new Rect(
             new Position(5, 45),
             BitmapUtils.getSizeByWidth(playerSprite, 15)
         );
@@ -143,7 +144,10 @@ public class GameActivity extends BaseActivity {
                         collisionLayer.getGameObjects()
                                       .stream()
                                       .filter(obj -> obj instanceof Obstacle)
-                                      .forEach(GameObject::destroy);
+                                      .forEach(obstacle -> {
+                                          obstacle.destroy();
+                                          createExplosion(((Obstacle) obstacle).getRect());
+                                      });
                     }
                 });
             }
@@ -156,6 +160,20 @@ public class GameActivity extends BaseActivity {
 
     private void createObstacles() {
         Obstacle obstacle = Obstacle.createRandom(assets, difficulty, sounds);
+        obstacle.addOnCollisionListener((other, p) -> {
+            if (other instanceof Obstacle) {
+                float x = SizeSystem.getInstance().widthFromPx(p.x);
+                float y = SizeSystem.getInstance().heightFromPx(p.y);
+                Size size = Size.squareFromWidth(5);
+                Position position = new Position(x - size.getX() / 2, y - size.getY() / 2);
+
+                createExplosion(new Rect(position, size));
+                handler.postDelayed(() -> createExplosion(obstacle.getRect()), 150);
+                handler.postDelayed(() -> createExplosion(other.getRect()), 300);
+            } else if (other instanceof Player) {
+                createExplosion(obstacle.getRect());
+            }
+        });
         obstacle.addOnDestroyListener(() -> {
             if (obstacle.getRect().getLeftPx() < 0) {
                 score.increment();
@@ -190,7 +208,7 @@ public class GameActivity extends BaseActivity {
         Rect buttonRect = new Rect(buttonPosition, buttonSize);
 
         Button menuButton = new Button(buttonRect, assets.getPauseButtonBitmap());
-        menuButton.addOnClickListener(this::pauseGame);
+        menuButton.addOnClickListener(() -> pauseGame(true));
         overlayLayer.add(menuButton);
     }
 
@@ -220,7 +238,7 @@ public class GameActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        pauseGame();
+        pauseGame(true);
     }
 
     @Override
@@ -243,7 +261,7 @@ public class GameActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        pauseGame();
+        pauseGame(true);
     }
 
     private void startGame() {
@@ -276,32 +294,27 @@ public class GameActivity extends BaseActivity {
         }
     }
 
-    private void pauseGame() {
+    private void pauseGame(boolean showMenu) {
         game.stop();
         game.saveState();
         score.save();
-        openMenu();
+        if (showMenu) {
+            openMenu();
+        }
     }
 
     private void gameOver() {
-        Animation animation = new Animation(
+        setLayerStatusIf(layer -> layer != animationLayer, GameLayer.Status.DrawEnabled);
+
+        Rect playerRect = player.getRect();
+        createExplosion(new Rect(
             playerRect.position,
-            assets.getExplosionAnimation(),
-            12,
-            300,
-            Size.fromWidthAndHeight(15, 15)
-        );
-        animation.startAnimation();
-        animationLayer.add(animation);
-        if (player != null) {
-            player.setAnimationPlaying(true); // Stop player movement
-        }
-        handler.postDelayed(() -> {
-            game.stop();
-            score.save();
-            createGameOverDialog();
-            openMenu();
-        }, 2700);
+            Size.squareFromWidth(playerRect.size.getX())
+        )).addOnDestroyListener(() -> runOnUiThread(() -> {
+            pauseGame(false);
+            sounds.pauseMusic();
+            gameOverMenu.show();
+        }));
     }
 
     private void createGameOverDialog() {
@@ -313,12 +326,25 @@ public class GameActivity extends BaseActivity {
             recreate();
         });
 
-        menu = createDialogBuilder()
+        gameOverMenu = createDialogBuilder()
             .setMessage(getString(R.string.game_over))
             .setView(gameOverBinding.getRoot())
             .setBackground(ContextCompat.getDrawable(this, R.drawable.game_over))
             .setCancelable(false)
             .create();
+    }
+
+    private SpriteSheetObject createExplosion(Rect rect) {
+        SpriteSheetObject explosion = new SpriteSheetObject(
+            rect,
+            assets.getExplosionAnimation(),
+            12,
+            SpriteSheetObject.LoopPolicy.Destroy,
+            Duration.ofMillis(1000)
+        );
+        animationLayer.add(explosion);
+
+        return explosion;
     }
 
     private Paint createPaint(float textSize) {

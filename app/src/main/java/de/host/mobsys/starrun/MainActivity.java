@@ -11,6 +11,7 @@ import de.host.mobsys.starrun.databinding.ActivityMainBinding;
 public class MainActivity extends BaseActivity {
 
     private Sounds sounds;
+    private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,11 +20,16 @@ public class MainActivity extends BaseActivity {
         sounds = new Sounds(this);
         sounds.playMusic(R.raw.lobby_music);
 
-        ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        binding.highscore.setText(getString(R.string.highscore, storage.get(HIGHSCORE)));
+        
         binding.play.setOnClickListener(v -> startActivity(new Intent(this, GameActivity.class)));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        binding.highscore.setText(getString(R.string.highscore, storage.get(HIGHSCORE)));
     }
 
     @Override
