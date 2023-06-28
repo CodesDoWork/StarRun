@@ -55,7 +55,7 @@ public class GameLayer {
         getGameObjects().forEach(gameObject -> gameObject.onGlobalTouchEvent(event));
     }
 
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(MotionEvent event, Point touchStart) {
         Point touchedPoint = new Point((int) event.getX(), (int) event.getY());
 
         // go through list in reverse order to go from top to bottom views.
@@ -65,6 +65,7 @@ public class GameLayer {
         while (objectsIterator.hasPrevious()) {
             CollidingGameObject gameObject = objectsIterator.previous();
             if (gameObject.containsCoordinates(touchedPoint.x, touchedPoint.y)
+                && gameObject.containsCoordinates(touchStart.x, touchStart.y)
                 && gameObject.onTouchEvent(event)) {
                 return true;
             }

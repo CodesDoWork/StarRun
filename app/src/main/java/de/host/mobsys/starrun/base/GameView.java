@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -27,6 +28,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Vie
     private final List<GameLayer> layers = new ArrayList<>();
 
     private Bitmap savedStateBitmap = null;
+    private Point touchStart = null;
 
     public GameView(Context context) {
         super(context);
@@ -84,11 +86,15 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Vie
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            touchStart = new Point((int) event.getX(), (int) event.getY());
+        }
+
         boolean isTouchConsumed = false;
         ListIterator<GameLayer> layersIterator = layers.listIterator(layers.size());
         while (layersIterator.hasPrevious() && !isTouchConsumed) {
             GameLayer layer = layersIterator.previous();
-            isTouchConsumed = layer.onTouchEvent(event);
+            isTouchConsumed = layer.onTouchEvent(event, touchStart);
             if (!isTouchConsumed) {
                 layer.onGlobalTouchEvent(event);
             }
