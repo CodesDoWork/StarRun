@@ -3,9 +3,14 @@ package de.host.mobsys.starrun.base.views;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 
+import androidx.annotation.NonNull;
+
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.host.mobsys.starrun.base.CollidingGameObject;
 import de.host.mobsys.starrun.base.GameObject;
@@ -20,22 +25,29 @@ import de.host.mobsys.starrun.base.size.SizeSystem;
 public class BitmapObject extends GameObject implements CollidingGameObject {
 
     protected final Rect rect;
-    protected final Bitmap sprite;
     private final Bitmap fullscreenBitmap;
     private final Canvas objectOnly;
+    private final List<OnCollisionListener> onCollisionListeners = new ArrayList<>();
 
+    protected Bitmap originalSprite;
+    protected Bitmap sprite;
     protected Velocity1D rotationSpeed = Velocity1D.ZERO;
 
     public BitmapObject(Rect rect, Bitmap sprite) {
         super(rect.position);
         this.rect = rect;
-        this.sprite = BitmapUtils.scaleBitmap(sprite, rect.size);
+        this.originalSprite = sprite;
+        createSprite();
         fullscreenBitmap = Bitmap.createBitmap(
             SizeSystem.getDisplayWidth(),
             SizeSystem.getDisplayHeight(),
             Bitmap.Config.ARGB_8888
         );
         objectOnly = new Canvas(fullscreenBitmap);
+    }
+
+    protected void createSprite() {
+        sprite = BitmapUtils.scaleBitmap(originalSprite, rect.size);
     }
 
     @Override
@@ -72,8 +84,17 @@ public class BitmapObject extends GameObject implements CollidingGameObject {
         rect.setRotation(rotation);
     }
 
+    @Override
+    public void onCollision(@NonNull CollidingGameObject other, Point point) {
+        onCollisionListeners.forEach(listener -> listener.onCollision(other, point));
+    }
+
+    public void addOnCollisionListener(OnCollisionListener listener) {
+        onCollisionListeners.add(listener);
+    }
+
     @FunctionalInterface
     public interface OnCollisionListener {
-        void onCollision();
+        void onCollision(@NonNull CollidingGameObject other, Point point);
     }
 }

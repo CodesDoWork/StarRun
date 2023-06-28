@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import de.host.mobsys.starrun.R;
 import de.host.mobsys.starrun.base.CollidingGameObject;
 import de.host.mobsys.starrun.base.physics.Velocity1D;
 import de.host.mobsys.starrun.base.physics.VelocityBuilder;
@@ -20,14 +21,18 @@ import de.host.mobsys.starrun.base.size.Rect;
 import de.host.mobsys.starrun.base.views.BitmapObject;
 import de.host.mobsys.starrun.control.Assets;
 import de.host.mobsys.starrun.control.RandomUtils;
+import de.host.mobsys.starrun.control.Sounds;
 import de.host.mobsys.starrun.models.Difficulty;
 
 public class Obstacle extends BitmapObject {
 
     private static final List<Rect> lastObstacleSpawns = new ArrayList<>();
 
-    private Obstacle(Rect rect, Bitmap sprite) {
+    private final Sounds sounds;
+
+    private Obstacle(Rect rect, Bitmap sprite, Sounds sounds) {
         super(rect, sprite);
+        this.sounds = sounds;
     }
 
     /**
@@ -37,7 +42,7 @@ public class Obstacle extends BitmapObject {
      * @param difficulty Difficulty to enable difficulty adjustments
      * @return The created Obstacle
      */
-    public static Obstacle createRandom(Assets assets, Difficulty difficulty) {
+    public static Obstacle createRandom(Assets assets, Difficulty difficulty, Sounds sounds) {
         Random random = new Random();
         Bitmap sprite = assets.getRandomObstacle();
 
@@ -56,7 +61,7 @@ public class Obstacle extends BitmapObject {
             Position position = new Position(110, y);
             rect = new Rect(position, BitmapUtils.getSizeByHeight(sprite, height));
         } while (++tries < maxTries && isCollidingSpawningArea(rect));
-        Obstacle obstacle = new Obstacle(rect, sprite);
+        Obstacle obstacle = new Obstacle(rect, sprite, sounds);
         Log.d("OBSTACLE", "Tries: " + tries);
 
         lastObstacleSpawns.add(rect);
@@ -101,6 +106,11 @@ public class Obstacle extends BitmapObject {
 
     @Override
     public void onCollision(@NonNull CollidingGameObject other, Point point) {
-        destroy();
+        super.onCollision(other, point);
+
+        if (!(other instanceof PowerUpView)) {
+            sounds.playSound(R.raw.explosion);
+            destroy();
+        }
     }
 }

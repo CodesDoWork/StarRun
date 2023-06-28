@@ -74,7 +74,7 @@ public class GameLayer {
         return false;
     }
 
-    protected List<GameObject> getGameObjects() {
+    public List<GameObject> getGameObjects() {
         return new ArrayList<>(gameObjects);
     }
 

@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat;
 import java.util.function.Predicate;
 
 import de.host.mobsys.starrun.base.GameLayer;
+import de.host.mobsys.starrun.base.GameObject;
 import de.host.mobsys.starrun.base.GameView;
 import de.host.mobsys.starrun.base.size.BitmapUtils;
 import de.host.mobsys.starrun.base.size.Position;
@@ -27,15 +28,18 @@ import de.host.mobsys.starrun.base.views.CollisionLayer;
 import de.host.mobsys.starrun.base.views.TextObject;
 import de.host.mobsys.starrun.control.Assets;
 import de.host.mobsys.starrun.control.PreferenceInfo;
+import de.host.mobsys.starrun.control.Sounds;
 import de.host.mobsys.starrun.databinding.GameOverBinding;
 import de.host.mobsys.starrun.databinding.PauseMenuBinding;
 import de.host.mobsys.starrun.models.Difficulty;
+import de.host.mobsys.starrun.models.PowerUp;
 import de.host.mobsys.starrun.models.Score;
 import de.host.mobsys.starrun.views.Animation;
 import de.host.mobsys.starrun.views.Background;
 import de.host.mobsys.starrun.views.Countdown;
 import de.host.mobsys.starrun.views.Obstacle;
 import de.host.mobsys.starrun.views.Player;
+import de.host.mobsys.starrun.views.PowerUpView;
 
 public class GameActivity extends BaseActivity {
 
@@ -50,6 +54,8 @@ public class GameActivity extends BaseActivity {
 
     private GameView game;
     private Assets assets;
+    private Sounds sounds;
+
     private Score score;
     private int highScore = 0;
 
@@ -65,9 +71,11 @@ public class GameActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         isRecreating = false;
 
+        assets = new Assets(getResources().getAssets());
+        sounds = new Sounds(this);
+
         score = new Score(storage);
         score.addChangeListener(difficulty::setFromScore);
-        assets = new Assets(getResources().getAssets());
 
         // only update if unset
         if (highScore == 0) {
@@ -119,14 +127,35 @@ public class GameActivity extends BaseActivity {
             new Position(5, 45),
             BitmapUtils.getSizeByWidth(playerSprite, 15)
         );
-        player = new Player(playerRect, playerSprite, difficulty);
+        player = new Player(playerRect, assets, difficulty, sounds);
         player.addOnMoveListener((x, y) -> backgroundLayer.translate(0, -y / 100));
-        player.addOnCollisionListener(this::gameOver);
+        player.addOnDestroyListener(this::gameOver);
         collisionLayer.add(player);
     }
 
+    private void createPowerUps(boolean isFirst) {
+        if (!isFirst) {
+            PowerUpView powerUpView = PowerUpView.createRandom(assets, difficulty, sounds);
+            collisionLayer.add(powerUpView);
+            if (powerUpView.powerUp == PowerUp.Bomb) {
+                powerUpView.addOnCollisionListener((other, p) -> {
+                    if (other instanceof Player) {
+                        collisionLayer.getGameObjects()
+                                      .stream()
+                                      .filter(obj -> obj instanceof Obstacle)
+                                      .forEach(GameObject::destroy);
+                    }
+                });
+            }
+        }
+
+        if (game.isRunning()) {
+            handler.postDelayed(() -> createPowerUps(false), (int) (25_000 / difficulty.get()));
+        }
+    }
+
     private void createObstacles() {
-        Obstacle obstacle = Obstacle.createRandom(assets, difficulty);
+        Obstacle obstacle = Obstacle.createRandom(assets, difficulty, sounds);
         obstacle.addOnDestroyListener(() -> {
             if (obstacle.getRect().getLeftPx() < 0) {
                 score.increment();
@@ -195,6 +224,24 @@ public class GameActivity extends BaseActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        sounds.resumeMusic();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        sounds.pauseMusic();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        sounds.release();
+    }
+
+    @Override
     public void onBackPressed() {
         pauseGame();
     }
@@ -207,10 +254,15 @@ public class GameActivity extends BaseActivity {
     private void countdown() {
         setLayerStatusIf(layer -> layer != countdownLayer, GameLayer.Status.DrawEnabled);
 
-        Countdown countdown = new Countdown(new Position(50, 50), createPaint(120));
+        Countdown countdown = new Countdown(new Position(50, 50), createPaint(120), sounds);
         countdown.addOnDestroyListener(() -> {
             setLayerStatusIf(layer -> layer != countdownLayer, GameLayer.Status.Enabled);
+            if (!sounds.isMusicPlaying()) {
+                sounds.playMusic(R.raw.game_music);
+            }
+
             createObstacles();
+            createPowerUps(true);
         });
         countdownLayer.add(countdown);
         countdown.start(3);

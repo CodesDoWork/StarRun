@@ -44,4 +44,9 @@ public class SizeVector2D {
     public void setYPx(int px) {
         this.y = SizeSystem.getInstance().heightFromPx(px);
     }
+
+    public void multiply(float factor) {
+        x *= factor;
+        y *= factor;
+    }
 }

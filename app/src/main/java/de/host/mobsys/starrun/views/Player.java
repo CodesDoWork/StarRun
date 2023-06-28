@@ -1,6 +1,7 @@
 package de.host.mobsys.starrun.views;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Point;
 import android.view.MotionEvent;
 
@@ -10,28 +11,46 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.host.mobsys.starrun.R;
 import de.host.mobsys.starrun.base.CollidingGameObject;
 import de.host.mobsys.starrun.base.physics.Velocity;
 import de.host.mobsys.starrun.base.physics.VelocityBuilder;
+import de.host.mobsys.starrun.base.size.BitmapUtils;
 import de.host.mobsys.starrun.base.size.Rect;
+import de.host.mobsys.starrun.base.size.Size;
 import de.host.mobsys.starrun.base.views.BitmapObject;
+import de.host.mobsys.starrun.control.Assets;
+import de.host.mobsys.starrun.control.Sounds;
 import de.host.mobsys.starrun.models.Difficulty;
+import de.host.mobsys.starrun.models.PowerUp;
 
 public class Player extends BitmapObject {
     private static final float UP_SPEED = 70;
     private static final float DOWN_SPEED = 40;
+    private static final Duration SHIELD_DURATION = Duration.ofSeconds(10);
+    private static final Duration SHRINK_DURATION = Duration.ofSeconds(10);
+    private static final float SHRINK_FACTOR = 2;
 
     private final List<OnMoveListener> onMoveListeners = new ArrayList<>();
-    private final List<OnCollisionListener> onCollisionListeners = new ArrayList<>();
-    private boolean isAnimationPlaying = false;
+    private final Sounds sounds;
 
+    private final Bitmap originalShieldSprite;
+    private Bitmap shieldSprite;
 
     private Velocity down = new VelocityBuilder().down(DOWN_SPEED).build();
     private Velocity up = new VelocityBuilder().up(UP_SPEED).build();
 
-    public Player(Rect rect, Bitmap sprite, Difficulty difficulty) {
-        super(rect, sprite);
+    private Duration remainingShieldDuration = Duration.ZERO;
+    private Duration remainingShrinkDuration = Duration.ZERO;
+    private boolean isAnimationPlaying = false;
+
+    public Player(Rect rect, Assets assets, Difficulty difficulty, Sounds sounds) {
+        super(rect, assets.getPlayerBitmap());
+        this.sounds = sounds;
         velocity = down;
+
+        this.originalShieldSprite = assets.getShieldBitmap();
+        createShieldSprite();
 
         difficulty.addChangeListener(value -> {
             down = new VelocityBuilder().down(DOWN_SPEED * difficulty.getHalf()).build();
@@ -42,8 +61,16 @@ public class Player extends BitmapObject {
     public void setAnimationPlaying(boolean animationPlaying) {
         isAnimationPlaying = animationPlaying;
         if (animationPlaying) {
-            velocity = new Velocity(0, 0); // Set velocity to stop the player
+            velocity = Velocity.ZERO;
         }
+    }
+
+    private boolean hasShield() {
+        return !(remainingShieldDuration.isNegative() || remainingShieldDuration.isZero());
+    }
+
+    private boolean isShrunk() {
+        return !(remainingShrinkDuration.isNegative() || remainingShieldDuration.isZero());
     }
 
     @Override
@@ -57,6 +84,25 @@ public class Player extends BitmapObject {
             if (moved != 0) {
                 onMoveListeners.forEach(listener -> listener.onMove(0, moved));
             }
+        }
+
+        boolean wasShrunk = isShrunk();
+
+        remainingShieldDuration = remainingShieldDuration.minus(elapsedTime);
+        remainingShrinkDuration = remainingShrinkDuration.minus(elapsedTime);
+
+        if (!isShrunk() && wasShrunk) {
+            rect.size.multiply(SHRINK_FACTOR);
+            createSprite();
+            createShieldSprite();
+        }
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+        if (hasShield()) {
+            canvas.drawBitmap(shieldSprite, rect.getMatrix(), null);
         }
     }
 
@@ -73,15 +119,42 @@ public class Player extends BitmapObject {
 
     @Override
     public void onCollision(@NonNull CollidingGameObject other, Point point) {
-        onCollisionListeners.forEach(OnCollisionListener::onCollision);
+        super.onCollision(other, point);
+
+        if (other instanceof Obstacle) {
+            if (hasShield()) {
+                sounds.playSound(R.raw.no_power_up);
+                remainingShieldDuration = Duration.ZERO;
+            } else {
+                sounds.playSound(R.raw.death);
+                destroy();
+            }
+        } else if (other instanceof PowerUpView powerUpView) {
+            PowerUp powerUp = powerUpView.powerUp;
+            sounds.playSound(powerUp.audioId);
+            if (powerUp == PowerUp.Shield) {
+                remainingShieldDuration = SHIELD_DURATION;
+            } else if (powerUp == PowerUp.Shrink) {
+                if (!isShrunk()) {
+                    rect.size.multiply(1 / SHRINK_FACTOR);
+                    createSprite();
+                    createShieldSprite();
+                }
+
+                remainingShrinkDuration = SHRINK_DURATION;
+            }
+        }
+    }
+
+    private void createShieldSprite() {
+        shieldSprite = BitmapUtils.scaleBitmap(
+            originalShieldSprite,
+            Size.squareFromWidth(rect.size.getX())
+        );
     }
 
     public void addOnMoveListener(OnMoveListener listener) {
         onMoveListeners.add(listener);
-    }
-
-    public void addOnCollisionListener(OnCollisionListener listener) {
-        onCollisionListeners.add(listener);
     }
 
     @FunctionalInterface

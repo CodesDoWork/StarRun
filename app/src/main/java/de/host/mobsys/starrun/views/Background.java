@@ -35,9 +35,8 @@ public class Background extends GameObject {
         }
         addRandomSprite();
 
-        difficulty.addChangeListener(value -> {
-            velocity = new VelocityBuilder().left(difficulty.get()).build();
-        });
+        difficulty.addChangeListener(value -> velocity =
+            new VelocityBuilder().left(difficulty.get()).build());
     }
 
     @Override
@@ -56,7 +55,7 @@ public class Background extends GameObject {
         int spriteIdx = 0;
         for (
             int x = position.getXPx();
-            x < SizeSystem.getDisplayWidth();
+            x < SizeSystem.getDisplayWidth() * 1.1f;
             x += sprites.get(spriteIdx - 1).getWidth()
         ) {
             canvas.drawBitmap(sprites.get(spriteIdx++), x, position.getYPx(), null);
