@@ -55,6 +55,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Vie
         gameLoop.stop();
     }
 
+    public boolean isRunning() {
+        return gameLoop.isRunning();
+    }
+
     public void add(GameLayer layer) {
         layers.add(layer);
     }

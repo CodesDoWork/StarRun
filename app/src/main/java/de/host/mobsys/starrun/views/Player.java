@@ -15,17 +15,26 @@ import de.host.mobsys.starrun.base.physics.Velocity;
 import de.host.mobsys.starrun.base.physics.VelocityBuilder;
 import de.host.mobsys.starrun.base.size.Rect;
 import de.host.mobsys.starrun.base.views.BitmapObject;
+import de.host.mobsys.starrun.models.Difficulty;
 
 public class Player extends BitmapObject {
-    private static final Velocity DOWN = new VelocityBuilder().down(35).build();
-    private static final Velocity UP = new VelocityBuilder().up(60).build();
+    private static final float UP_SPEED = 60;
+    private static final float DOWN_SPEED = 35;
 
     private final List<OnMoveListener> onMoveListeners = new ArrayList<>();
     private final List<OnCollisionListener> onCollisionListeners = new ArrayList<>();
 
-    public Player(Rect rect, Bitmap sprite) {
+    private Velocity down = new VelocityBuilder().down(DOWN_SPEED).build();
+    private Velocity up = new VelocityBuilder().up(UP_SPEED).build();
+
+    public Player(Rect rect, Bitmap sprite, Difficulty difficulty) {
         super(rect, sprite);
-        velocity = DOWN;
+        velocity = down;
+
+        difficulty.addChangeListener(value -> {
+            down = new VelocityBuilder().down(DOWN_SPEED * difficulty.getHalf()).build();
+            up = new VelocityBuilder().up(UP_SPEED * difficulty.getHalf()).build();
+        });
     }
 
     @Override
@@ -45,9 +54,9 @@ public class Player extends BitmapObject {
         super.onGlobalTouchEvent(event);
 
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            velocity = UP;
+            velocity = up;
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
-            velocity = DOWN;
+            velocity = down;
         }
     }
 
