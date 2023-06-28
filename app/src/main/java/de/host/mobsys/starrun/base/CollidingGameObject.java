@@ -19,7 +19,7 @@ public interface CollidingGameObject {
      *
      * @return whether the event is consumed or not
      */
-    default boolean onTouchEvent(MotionEvent event) {//TODO
+    default boolean onTouchEvent(MotionEvent event) {
         return false;
     }
 
