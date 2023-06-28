@@ -11,24 +11,24 @@
         android:layout_rowWeight="1"
         android:layout_columnSpan="3" />
 
-    <Space android:layout_columnWeight="2" />
+    <Space android:layout_columnWeight="1" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/restart"
-        android:layout_columnWeight="2"
+        android:layout_columnWeight="1"
         android:layout_marginBottom="8dp"
         android:text="@string/restart" />
 
-    <Space android:layout_columnWeight="2" />
+    <Space android:layout_columnWeight="1" />
 
-    <Space android:layout_columnWeight="2" />
+    <Space android:layout_columnWeight="1" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/exit"
-        android:layout_columnWeight="2"
+        android:layout_columnWeight="1"
         android:text="@string/exit" />
 
-    <Space android:layout_columnWeight="2" />
+    <Space android:layout_columnWeight="1" />
 
     <Space
         android:layout_rowWeight="1"
