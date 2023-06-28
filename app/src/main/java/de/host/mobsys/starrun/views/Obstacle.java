@@ -53,7 +53,7 @@ public class Obstacle extends BitmapObject {
         int maxTries = 3;
         do {
             float y = RandomUtils.between(minY, maxY);
-            Position position = new Position(100, y);
+            Position position = new Position(110, y);
             rect = new Rect(position, BitmapUtils.getSizeByHeight(sprite, height));
         } while (++tries < maxTries && isCollidingSpawningArea(rect));
         Obstacle obstacle = new Obstacle(rect, sprite);

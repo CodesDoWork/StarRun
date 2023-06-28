@@ -12,6 +12,8 @@ import android.view.Display;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
+import java.util.function.Predicate;
+
 import de.host.mobsys.starrun.base.GameLayer;
 import de.host.mobsys.starrun.base.GameView;
 import de.host.mobsys.starrun.base.size.BitmapUtils;
@@ -31,6 +33,7 @@ import de.host.mobsys.starrun.models.Difficulty;
 import de.host.mobsys.starrun.models.Score;
 import de.host.mobsys.starrun.views.Animation;
 import de.host.mobsys.starrun.views.Background;
+import de.host.mobsys.starrun.views.Countdown;
 import de.host.mobsys.starrun.views.Obstacle;
 import de.host.mobsys.starrun.views.Player;
 
@@ -40,6 +43,7 @@ public class GameActivity extends BaseActivity {
     private final GameLayer collisionLayer = new CollisionLayer();
     private final GameLayer animationLayer = new GameLayer();
     private final GameLayer overlayLayer = new GameLayer();
+    private final GameLayer countdownLayer = new GameLayer();
 
     private final Handler handler = new Handler();
     private final Difficulty difficulty = new Difficulty();
@@ -95,6 +99,7 @@ public class GameActivity extends BaseActivity {
         game.add(collisionLayer);
         game.add(animationLayer);
         game.add(overlayLayer);
+        game.add(countdownLayer);
 
         createBackground();
         createPlayer();
@@ -136,15 +141,10 @@ public class GameActivity extends BaseActivity {
     }
 
     private void createScore() {
-        Paint scorePaint = new Paint();
-        scorePaint.setTextSize(SizeSystem.getInstance().heightToPx(2.75f));
-        scorePaint.setAntiAlias(true);
-        scorePaint.setTypeface(assets.readFont());
-        scorePaint.setColor(Color.WHITE);
-
-        scoreObject = new TextObject(new Position(62.5f, 5), scorePaint);
-        setScoreText();
+        Paint scorePaint = createPaint(SizeSystem.getInstance().heightToPx(2.75f));
+        scoreObject = new TextObject(new Position(65, 5), scorePaint);
         overlayLayer.add(scoreObject);
+        setScoreText();
     }
 
     @SuppressLint("StringFormatInvalid")
@@ -163,6 +163,72 @@ public class GameActivity extends BaseActivity {
         Button menuButton = new Button(buttonRect, assets.getPauseButtonBitmap());
         menuButton.addOnClickListener(this::pauseGame);
         overlayLayer.add(menuButton);
+    }
+
+    private void createMenuDialog() {
+        PauseMenuBinding dialogBinding = PauseMenuBinding.inflate(getLayoutInflater());
+        dialogBinding.resume.setOnClickListener(v -> menu.dismiss());
+        dialogBinding.exit.setOnClickListener(v -> finish());
+        dialogBinding.restart.setOnClickListener(v -> {
+            isRecreating = true;
+            menu.dismiss();
+            recreate();
+        });
+
+        menu = createDialogBuilder()
+            .setMessage(getString(R.string.pause))
+            .setView(dialogBinding.getRoot())
+            .setOnDismissListener(v -> startGame())
+            .create();
+    }
+
+    private void openMenu() {
+        if (!menu.isShowing() && !isRecreating) {
+            menu.show();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        pauseGame();
+    }
+
+    @Override
+    public void onBackPressed() {
+        pauseGame();
+    }
+
+    private void startGame() {
+        game.start();
+        countdown();
+    }
+
+    private void countdown() {
+        setLayerStatusIf(layer -> layer != countdownLayer, GameLayer.Status.DrawEnabled);
+
+        Countdown countdown = new Countdown(new Position(50, 50), createPaint(120));
+        countdown.addOnDestroyListener(() -> {
+            setLayerStatusIf(layer -> layer != countdownLayer, GameLayer.Status.Enabled);
+            createObstacles();
+        });
+        countdownLayer.add(countdown);
+        countdown.start(3);
+    }
+
+    private void setLayerStatusIf(Predicate<GameLayer> predicate, GameLayer.Status status) {
+        for (GameLayer layer : game.getLayers()) {
+            if (predicate.test(layer)) {
+                layer.setStatus(status);
+            }
+        }
+    }
+
+    private void pauseGame() {
+        game.stop();
+        game.saveState();
+        score.save();
+        openMenu();
     }
 
     private void gameOver() {
@@ -186,54 +252,7 @@ public class GameActivity extends BaseActivity {
         }, 2700);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        pauseGame();
-    }
-
-    @Override
-    public void onBackPressed() {
-        pauseGame();
-    }
-
-    private void startGame() {
-        game.start();
-        createObstacles();
-    }
-
-    private void pauseGame() {
-        game.stop();
-        game.saveState();
-        score.save();
-        openMenu();
-    }
-
-    private void openMenu() {
-        if (!menu.isShowing() && !isRecreating) {
-            menu.show();
-        }
-    }
-
-    private void createMenuDialog() {
-        PauseMenuBinding dialogBinding = PauseMenuBinding.inflate(getLayoutInflater());
-        dialogBinding.resume.setOnClickListener(v -> menu.dismiss());
-        dialogBinding.exit.setOnClickListener(v -> finish());
-        dialogBinding.restart.setOnClickListener(v -> {
-            isRecreating = true;
-            menu.dismiss();
-            recreate();
-        });
-
-        menu = createDialogBuilder()
-            .setMessage(getString(R.string.pause))
-            .setView(dialogBinding.getRoot())
-            .setBackground(ContextCompat.getDrawable(this, R.drawable.menu_background))
-            .setOnDismissListener(v -> startGame())
-            .create();
-    }
-
-    private  void createGameOverDialog() {
+    private void createGameOverDialog() {
         GameOverBinding gameOverBinding = GameOverBinding.inflate(getLayoutInflater());
         gameOverBinding.exit.setOnClickListener(v -> finish());
         gameOverBinding.restart.setOnClickListener(v -> {
@@ -248,6 +267,16 @@ public class GameActivity extends BaseActivity {
             .setBackground(ContextCompat.getDrawable(this, R.drawable.game_over))
             .setCancelable(false)
             .create();
+    }
+
+    private Paint createPaint(float textSize) {
+        Paint paint = new Paint();
+        paint.setTextSize(textSize);
+        paint.setAntiAlias(true);
+        paint.setTypeface(assets.readFont());
+        paint.setColor(Color.WHITE);
+
+        return paint;
     }
 }
 
