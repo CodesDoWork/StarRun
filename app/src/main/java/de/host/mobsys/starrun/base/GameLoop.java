@@ -50,6 +50,10 @@ class GameLoop {
         isRunning = false;
     }
 
+    public boolean isRunning() {
+        return isRunning;
+    }
+
     interface GameLoopListener {
         void update(Duration elapsedTime);
 

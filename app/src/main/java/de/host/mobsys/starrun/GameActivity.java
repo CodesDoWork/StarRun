@@ -1,5 +1,6 @@
 package de.host.mobsys.starrun;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -24,6 +25,8 @@ import de.host.mobsys.starrun.base.views.TextObject;
 import de.host.mobsys.starrun.control.Assets;
 import de.host.mobsys.starrun.control.PreferenceInfo;
 import de.host.mobsys.starrun.databinding.PauseMenuBinding;
+import de.host.mobsys.starrun.models.Difficulty;
+import de.host.mobsys.starrun.models.Score;
 import de.host.mobsys.starrun.views.Animation;
 import de.host.mobsys.starrun.views.Background;
 import de.host.mobsys.starrun.views.Obstacle;
@@ -37,13 +40,14 @@ public class GameActivity extends BaseActivity {
     private final GameLayer overlayLayer = new GameLayer();
 
     private final Handler handler = new Handler();
+    private final Difficulty difficulty = new Difficulty();
 
     private GameView game;
     private Assets assets;
-    private AlertDialog menu = null;
-
-    private int score = 0;
+    private Score score;
     private int highScore = 0;
+
+    private AlertDialog menu = null;
     private TextObject scoreObject;
 
     private boolean isRecreating = false;
@@ -53,6 +57,8 @@ public class GameActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         isRecreating = false;
 
+        score = new Score(storage);
+        score.addChangeListener(difficulty::setFromScore);
         assets = new Assets(getResources().getAssets());
 
         // only update if unset
@@ -63,6 +69,7 @@ public class GameActivity extends BaseActivity {
         setupSizeSystem();
         createMenuDialog();
         setupGame();
+        startGame();
     }
 
     private void setupSizeSystem() {
@@ -79,7 +86,6 @@ public class GameActivity extends BaseActivity {
     private void setupGame() {
         game = new GameView(this);
         setContentView(game);
-        game.start();
 
         game.add(backgroundLayer);
         game.add(collisionLayer);
@@ -88,27 +94,26 @@ public class GameActivity extends BaseActivity {
 
         createBackground();
         createPlayer();
-        createObstacles();
         createScore();
         createMenuButton();
     }
 
     private void createBackground() {
-        Background background = new Background(110, assets);
+        Background background = new Background(110, assets, difficulty);
         backgroundLayer.add(background);
     }
 
     private void createPlayer() {
         Bitmap playerSprite = assets.getPlayerBitmap();
-
         Rect playerRect = new Rect(
             new Position(5, 45),
             BitmapUtils.getSizeByWidth(playerSprite, 15)
         );
-        Player player = new Player(playerRect, playerSprite);
+        Player player = new Player(playerRect, playerSprite, difficulty);
         player.addOnMoveListener((x, y) -> backgroundLayer.translate(0, -y / 100));
         player.addOnCollisionListener(this::gameOver);
         collisionLayer.add(player);
+
         Animation animation = new Animation(
             playerRect.position,
             assets.getExplosionAnimation(),
@@ -122,15 +127,18 @@ public class GameActivity extends BaseActivity {
     }
 
     private void createObstacles() {
-        Obstacle obstacle = Obstacle.createRandom(assets);
+        Obstacle obstacle = Obstacle.createRandom(assets, difficulty);
         obstacle.addOnDestroyListener(() -> {
             if (obstacle.getRect().getLeftPx() < 0) {
-                ++score;
+                score.increment();
                 setScoreText();
             }
         });
         collisionLayer.add(obstacle);
-        handler.postDelayed(this::createObstacles, 3000);
+
+        if (game.isRunning()) {
+            handler.postDelayed(this::createObstacles, (int) (3000 / difficulty.get()));
+        }
     }
 
     private void createScore() {
@@ -145,8 +153,9 @@ public class GameActivity extends BaseActivity {
         overlayLayer.add(scoreObject);
     }
 
+    @SuppressLint("StringFormatInvalid")
     private void setScoreText() {
-        scoreObject.setText(getString(R.string.score, score) + "\n" + getString(
+        scoreObject.setText(getString(R.string.score, score.getScore()) + "\n" + getString(
             R.string.highscore,
             highScore
         ));
@@ -164,7 +173,7 @@ public class GameActivity extends BaseActivity {
 
     private void gameOver() {
         game.stop();
-        saveHighScore();
+        score.save();
     }
 
     @Override
@@ -178,15 +187,16 @@ public class GameActivity extends BaseActivity {
         pauseGame();
     }
 
+    private void startGame() {
+        game.start();
+        createObstacles();
+    }
+
     private void pauseGame() {
         game.stop();
         game.saveState();
-        saveHighScore();
+        score.save();
         openMenu();
-    }
-
-    private void saveHighScore() {
-        storage.set(PreferenceInfo.HIGHSCORE, Math.max(score, highScore));
     }
 
     private void openMenu() {
@@ -208,7 +218,7 @@ public class GameActivity extends BaseActivity {
         menu = createDialogBuilder()
             .setMessage(getString(R.string.pause))
             .setView(dialogBinding.getRoot())
-            .setOnDismissListener(v -> game.start())
+            .setOnDismissListener(v -> startGame())
             .create();
     }
 }

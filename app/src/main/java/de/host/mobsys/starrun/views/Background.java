@@ -8,24 +8,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.host.mobsys.starrun.base.GameObject;
-import de.host.mobsys.starrun.base.physics.Velocity;
 import de.host.mobsys.starrun.base.physics.VelocityBuilder;
 import de.host.mobsys.starrun.base.size.BitmapUtils;
 import de.host.mobsys.starrun.base.size.Position;
 import de.host.mobsys.starrun.base.size.SizeSystem;
 import de.host.mobsys.starrun.control.Assets;
+import de.host.mobsys.starrun.models.Difficulty;
 
 public class Background extends GameObject {
-
-    private static final Velocity BACKGROUND_VELOCITY = new VelocityBuilder().left(1).build();
 
     private final Assets assets;
     private final float height;
     private final List<Bitmap> sprites = new ArrayList<>();
 
-    public Background(float height, Assets assets) {
+    public Background(float height, Assets assets, Difficulty difficulty) {
         super(new Position(0, (100 - height) / 2));
-        velocity = BACKGROUND_VELOCITY;
+        velocity = new VelocityBuilder().left(1).build();
 
         this.height = height;
         this.assets = assets;
@@ -36,6 +34,10 @@ public class Background extends GameObject {
             width += sprites.get(sprites.size() - 1).getWidth();
         }
         addRandomSprite();
+
+        difficulty.addChangeListener(value -> {
+            velocity = new VelocityBuilder().left(difficulty.get()).build();
+        });
     }
 
     @Override
