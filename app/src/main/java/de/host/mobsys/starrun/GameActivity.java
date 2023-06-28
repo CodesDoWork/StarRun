@@ -155,7 +155,7 @@ public class GameActivity extends BaseActivity {
     private void setScoreText() {
         scoreObject.setText(getString(R.string.score, score.getScore()) + "\n" + getString(
             R.string.highscore,
-            score.getHighScore()
+            highScore
         ));
     }
 
