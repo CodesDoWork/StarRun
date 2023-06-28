@@ -33,7 +33,6 @@ public class Player extends BitmapObject {
     public Player(Rect rect, Bitmap sprite, Difficulty difficulty) {
         super(rect, sprite);
         velocity = down;
-        originalVelocity = down;
 
         difficulty.addChangeListener(value -> {
             down = new VelocityBuilder().down(DOWN_SPEED * difficulty.getHalf()).build();
@@ -44,7 +43,6 @@ public class Player extends BitmapObject {
     public void setAnimationPlaying(boolean animationPlaying) {
         isAnimationPlaying = animationPlaying;
         if (animationPlaying) {
-            originalVelocity = velocity;
             velocity = new Velocity(0, 0); // Set velocity to stop the player
         }
     }
