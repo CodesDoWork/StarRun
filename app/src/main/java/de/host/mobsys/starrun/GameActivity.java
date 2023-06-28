@@ -245,7 +245,7 @@ public class GameActivity extends BaseActivity {
         menu = createDialogBuilder()
             .setMessage(getString(R.string.game_over))
             .setView(gameOverBinding.getRoot())
-            .setBackground(ContextCompat.getDrawable(this, R.drawable.menu_background))
+            .setBackground(ContextCompat.getDrawable(this, R.drawable.game_over))
             .setCancelable(false)
             .create();
     }
