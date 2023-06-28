@@ -52,7 +52,7 @@ public class Animation extends GameObject {
     public void startAnimation() {
         frameWidth = spriteSheet.getWidth() / frameCount;
         frameHeight = spriteSheet.getHeight();
-        startTimeMillis = System.currentTimeMillis() + 1000;
+        startTimeMillis = System.currentTimeMillis();
         currentFrame = 0;
     }
 
@@ -70,7 +70,6 @@ public class Animation extends GameObject {
             // Animation finished
             destroy();
         }
-
     }
 
     /**

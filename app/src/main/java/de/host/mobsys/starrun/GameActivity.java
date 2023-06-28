@@ -47,6 +47,8 @@ public class GameActivity extends BaseActivity {
     private TextObject scoreObject;
 
     private boolean isRecreating = false;
+    private Player player;
+    private Rect playerRect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,24 +103,14 @@ public class GameActivity extends BaseActivity {
     private void createPlayer() {
         Bitmap playerSprite = assets.getPlayerBitmap();
 
-        Rect playerRect = new Rect(
+        playerRect = new Rect(
             new Position(5, 45),
             BitmapUtils.getSizeByWidth(playerSprite, 15)
         );
-        Player player = new Player(playerRect, playerSprite);
+        player = new Player(playerRect, playerSprite);
         player.addOnMoveListener((x, y) -> backgroundLayer.translate(0, -y / 100));
         player.addOnCollisionListener(this::gameOver);
         collisionLayer.add(player);
-        Animation animation = new Animation(
-            playerRect.position,
-            assets.getExplosionAnimation(),
-            12,
-            300,
-            Size.fromWidthAndHeight(15, 15)
-        );
-        animation.startAnimation();
-        //Remove the comment signs below to start the animation
-        //animationLayer.add(animation);
     }
 
     private void createObstacles() {
@@ -163,8 +155,23 @@ public class GameActivity extends BaseActivity {
     }
 
     private void gameOver() {
-        game.stop();
-        saveHighScore();
+        Animation animation = new Animation(
+            playerRect.position,
+            assets.getExplosionAnimation(),
+            12,
+            300,
+            Size.fromWidthAndHeight(15, 15)
+        );
+        animation.startAnimation();
+        animationLayer.add(animation);
+        if (player != null) {
+            player.setAnimationPlaying(true); // Stop player movement
+        }
+        handler.postDelayed(() -> {
+            game.stop();
+            saveHighScore();
+        }, 2700);
+
     }
 
     @Override
