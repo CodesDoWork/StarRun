@@ -42,7 +42,11 @@ public class Sounds {
 
         loadSound(R.raw.countdown);
         loadSound(R.raw.countdown_end);
+        loadSound(R.raw.death);
         loadSound(R.raw.explosion);
+        loadSound(R.raw.no_power_up);
+        loadSound(R.raw.shield);
+        loadSound(R.raw.shrink);
     }
 
     private void loadSound(@RawRes int audioId) {

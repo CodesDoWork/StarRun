@@ -25,24 +25,28 @@ import de.host.mobsys.starrun.base.size.SizeSystem;
 public class BitmapObject extends GameObject implements CollidingGameObject {
 
     protected final Rect rect;
-    protected final Bitmap sprite;
     private final Bitmap fullscreenBitmap;
     private final Canvas objectOnly;
-
     private final List<OnCollisionListener> onCollisionListeners = new ArrayList<>();
-
+    protected Bitmap originalSprite;
+    protected Bitmap sprite;
     protected Velocity1D rotationSpeed = Velocity1D.ZERO;
 
     public BitmapObject(Rect rect, Bitmap sprite) {
         super(rect.position);
         this.rect = rect;
-        this.sprite = BitmapUtils.scaleBitmap(sprite, rect.size);
+        this.originalSprite = sprite;
+        createSprite();
         fullscreenBitmap = Bitmap.createBitmap(
             SizeSystem.getDisplayWidth(),
             SizeSystem.getDisplayHeight(),
             Bitmap.Config.ARGB_8888
         );
         objectOnly = new Canvas(fullscreenBitmap);
+    }
+
+    protected void createSprite() {
+        sprite = BitmapUtils.scaleBitmap(originalSprite, rect.size);
     }
 
     @Override

@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import java.time.Duration;
 import java.util.Random;
 
+import de.host.mobsys.starrun.R;
 import de.host.mobsys.starrun.base.CollidingGameObject;
 import de.host.mobsys.starrun.base.physics.Velocity1D;
 import de.host.mobsys.starrun.base.physics.VelocityBuilder;
@@ -17,23 +18,29 @@ import de.host.mobsys.starrun.base.size.Rect;
 import de.host.mobsys.starrun.base.views.BitmapObject;
 import de.host.mobsys.starrun.control.Assets;
 import de.host.mobsys.starrun.control.RandomUtils;
+import de.host.mobsys.starrun.control.Sounds;
 import de.host.mobsys.starrun.models.Difficulty;
 import de.host.mobsys.starrun.models.PowerUp;
 
 public class PowerUpView extends BitmapObject {
 
-    private PowerUpView(Rect rect, Bitmap sprite) {
+    public final PowerUp powerUp;
+    private final Sounds sounds;
+
+    private PowerUpView(Rect rect, Bitmap sprite, Sounds sounds, PowerUp powerUp) {
         super(rect, sprite);
+        this.sounds = sounds;
+        this.powerUp = powerUp;
     }
 
     /**
-     * Creates a new Obstacle with random properties.
+     * Creates a new PowerUp with random properties.
      *
-     * @param assets     Assets to get a random obstacle sprite
+     * @param assets     Assets to get the sprites
      * @param difficulty Difficulty to enable difficulty adjustments
-     * @return The created Obstacle
+     * @return The created PowerUp
      */
-    public static PowerUpView createRandom(Assets assets, Difficulty difficulty) {
+    public static PowerUpView createRandom(Assets assets, Difficulty difficulty, Sounds sounds) {
         Random random = new Random();
 
         PowerUp powerUp = PowerUp.values()[random.nextInt(PowerUp.values().length)];
@@ -46,20 +53,22 @@ public class PowerUpView extends BitmapObject {
         Position position = new Position(110, y);
         Rect rect = new Rect(position, BitmapUtils.getSizeByHeight(sprite, height));
 
-        PowerUpView powerUpView = new PowerUpView(rect, sprite);
+        PowerUpView powerUpView = new PowerUpView(rect, sprite, sounds, powerUp);
 
         float minSpeed = 4 * difficulty.getHalf();
         float maxSpeed = 15 - height / 3f;
         float speed = RandomUtils.between(minSpeed, maxSpeed) * difficulty.get();
         powerUpView.setVelocity(new VelocityBuilder().left(speed).build());
 
-        powerUpView.setRotation(RandomUtils.between(0, 360));
+        if (powerUp != PowerUp.Shrink) {
+            powerUpView.setRotation(RandomUtils.between(0, 360));
 
-        int minSpin = 5;
-        int maxSpin = 90;
-        float spin = RandomUtils.between(minSpin, maxSpin);
-        spin *= random.nextBoolean() ? 1 : -1;
-        powerUpView.rotationSpeed = new Velocity1D(spin);
+            int minSpin = 5;
+            int maxSpin = 90;
+            float spin = RandomUtils.between(minSpin, maxSpin);
+            spin *= random.nextBoolean() ? 1 : -1;
+            powerUpView.rotationSpeed = new Velocity1D(spin);
+        }
 
         return powerUpView;
     }
@@ -75,6 +84,11 @@ public class PowerUpView extends BitmapObject {
     @Override
     public void onCollision(@NonNull CollidingGameObject other, Point point) {
         super.onCollision(other, point);
+
+        if (other instanceof Obstacle) {
+            sounds.playSound(R.raw.no_power_up);
+        }
+
         destroy();
     }
 }

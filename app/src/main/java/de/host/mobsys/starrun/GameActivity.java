@@ -120,15 +120,9 @@ public class GameActivity extends BaseActivity {
             new Position(5, 45),
             BitmapUtils.getSizeByWidth(playerSprite, 15)
         );
-        Player player = new Player(playerRect, playerSprite, difficulty);
+        Player player = new Player(playerRect, playerSprite, difficulty, sounds);
         player.addOnMoveListener((x, y) -> backgroundLayer.translate(0, -y / 100));
-        player.addOnCollisionListener((obj, p) -> {
-            if (obj instanceof Obstacle) {
-                gameOver();
-            } else {
-                // power up;
-            }
-        });
+        player.addOnDestroyListener(this::gameOver);
         collisionLayer.add(player);
 
         Animation animation = new Animation(
@@ -145,19 +139,17 @@ public class GameActivity extends BaseActivity {
 
     private void createPowerUps(boolean isFirst) {
         if (!isFirst) {
-            PowerUpView powerUpView = PowerUpView.createRandom(assets, difficulty);
-            powerUpView.addOnCollisionListener((obj, p) -> sounds.playSound(R.raw.explosion));
+            PowerUpView powerUpView = PowerUpView.createRandom(assets, difficulty, sounds);
             collisionLayer.add(powerUpView);
         }
 
         if (game.isRunning()) {
-            handler.postDelayed(() -> createPowerUps(false), (int) (17500 / difficulty.get()));
+            handler.postDelayed(() -> createPowerUps(false), (int) (35_000 / difficulty.get()));
         }
     }
 
     private void createObstacles() {
-        Obstacle obstacle = Obstacle.createRandom(assets, difficulty);
-        obstacle.addOnCollisionListener((obj, p) -> sounds.playSound(R.raw.explosion));
+        Obstacle obstacle = Obstacle.createRandom(assets, difficulty, sounds);
         obstacle.addOnDestroyListener(() -> {
             if (obstacle.getRect().getLeftPx() < 0) {
                 score.increment();
