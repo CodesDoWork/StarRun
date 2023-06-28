@@ -1,22 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:columnCount="3"
     android:gravity="center"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="@dimen/windowPadding">
+
+    <Space
+        android:layout_rowWeight="1"
+        android:layout_columnSpan="3" />
+
+    <Space android:layout_columnWeight="2" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/restart"
-        android:layout_width="@dimen/menuButtonWidth"
-        android:layout_height="wrap_content"
+        android:layout_columnWeight="2"
         android:layout_marginBottom="8dp"
         android:text="@string/restart" />
 
+    <Space android:layout_columnWeight="2" />
+
+    <Space android:layout_columnWeight="2" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/exit"
-        android:layout_width="@dimen/menuButtonWidth"
-        android:layout_height="wrap_content"
+        android:layout_columnWeight="2"
         android:text="@string/exit" />
 
-</LinearLayout>
+    <Space android:layout_columnWeight="2" />
+
+    <Space
+        android:layout_rowWeight="1"
+        android:layout_columnSpan="3" />
+
+</GridLayout>
