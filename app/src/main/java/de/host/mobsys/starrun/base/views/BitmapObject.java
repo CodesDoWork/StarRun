@@ -71,4 +71,9 @@ public class BitmapObject extends GameObject implements CollidingGameObject {
     public void setRotation(float rotation) {
         rect.setRotation(rotation);
     }
+
+    @FunctionalInterface
+    public interface OnCollisionListener {
+        void onCollision();
+    }
 }
