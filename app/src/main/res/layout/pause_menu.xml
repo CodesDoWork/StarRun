@@ -14,6 +14,16 @@
     <Space android:layout_columnWeight="1" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/resume"
+        android:layout_columnWeight="1"
+        android:layout_marginBottom="8dp"
+        android:text="@string/resume" />
+
+    <Space android:layout_columnWeight="1" />
+
+    <Space android:layout_columnWeight="1" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/restart"
         android:layout_columnWeight="1"
         android:layout_marginBottom="8dp"
