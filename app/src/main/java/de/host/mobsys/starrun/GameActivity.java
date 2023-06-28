@@ -1,5 +1,6 @@
 package de.host.mobsys.starrun;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -26,6 +27,7 @@ import de.host.mobsys.starrun.base.views.CollisionLayer;
 import de.host.mobsys.starrun.base.views.TextObject;
 import de.host.mobsys.starrun.control.Assets;
 import de.host.mobsys.starrun.control.Sounds;
+import de.host.mobsys.starrun.control.PreferenceInfo;
 import de.host.mobsys.starrun.databinding.PauseMenuBinding;
 import de.host.mobsys.starrun.models.Difficulty;
 import de.host.mobsys.starrun.models.Score;
@@ -47,11 +49,13 @@ public class GameActivity extends BaseActivity {
     private final Difficulty difficulty = new Difficulty();
 
     private GameView game;
-    private Score score;
     private Assets assets;
     private Sounds sounds;
-    private AlertDialog menu = null;
 
+    private Score score;
+    private int highScore = 0;
+
+    private AlertDialog menu = null;
     private TextObject scoreObject;
 
     private boolean isRecreating = false;
@@ -61,10 +65,16 @@ public class GameActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         isRecreating = false;
 
-        score = new Score(storage);
-        score.addChangeListener(difficulty::setFromScore);
         assets = new Assets(getResources().getAssets());
         sounds = new Sounds(this);
+
+        score = new Score(storage);
+        score.addChangeListener(difficulty::setFromScore);
+
+        // only update if unset
+        if (highScore == 0) {
+            highScore = storage.get(PreferenceInfo.HIGHSCORE);
+        }
 
         setupSizeSystem();
         createMenuDialog();
@@ -75,9 +85,11 @@ public class GameActivity extends BaseActivity {
     private void setupSizeSystem() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
-        display.getRealSize(size);
+        Point realSize = new Point();
+        display.getSize(size);
+        display.getRealSize(realSize);
 
-        SizeSystem.setup(size.x, size.y);
+        SizeSystem.setup(size.x, Math.max(size.y, realSize.y));
         SizeSystem.setSizeSystem(new PercentSizeSystem());
     }
 
@@ -145,15 +157,17 @@ public class GameActivity extends BaseActivity {
     }
 
     private void createScore() {
-        scoreObject = new TextObject(new Position(65, 5), createPaint(28));
+        Paint scorePaint = createPaint(SizeSystem.getInstance().heightToPx(2.75f));
+        scoreObject = new TextObject(new Position(65, 5), scorePaint);
         overlayLayer.add(scoreObject);
         setScoreText();
     }
 
+    @SuppressLint("StringFormatInvalid")
     private void setScoreText() {
         scoreObject.setText(getString(R.string.score, score.getScore()) + "\n" + getString(
             R.string.highscore,
-            score.getHighScore()
+            highScore
         ));
     }
 
@@ -256,6 +270,23 @@ public class GameActivity extends BaseActivity {
     private void gameOver() {
         game.stop();
         score.save();
+    }
+
+    private void createMenuDialog() {
+        PauseMenuBinding dialogBinding = PauseMenuBinding.inflate(getLayoutInflater());
+        dialogBinding.resume.setOnClickListener(v -> menu.dismiss());
+        dialogBinding.exit.setOnClickListener(v -> finish());
+        dialogBinding.restart.setOnClickListener(v -> {
+            isRecreating = true;
+            menu.dismiss();
+            recreate();
+        });
+
+        menu = createDialogBuilder()
+            .setMessage(getString(R.string.pause))
+            .setView(dialogBinding.getRoot())
+            .setOnDismissListener(v -> startGame())
+            .create();
     }
 
     private Paint createPaint(float textSize) {

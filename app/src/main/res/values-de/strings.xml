@@ -4,5 +4,6 @@
     <string name="pause">Pause</string>
     <string name="play">Spielen</string>
     <string name="restart">Neustart</string>
+    <string name="resume">Weiter</string>
     <string name="score">Punkte: %d</string>
 </resources>
