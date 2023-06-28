@@ -18,13 +18,13 @@ import de.host.mobsys.starrun.base.physics.VelocityBuilder;
 import de.host.mobsys.starrun.base.size.BitmapUtils;
 import de.host.mobsys.starrun.base.size.Rect;
 import de.host.mobsys.starrun.base.size.Size;
-import de.host.mobsys.starrun.base.views.BitmapObject;
 import de.host.mobsys.starrun.control.Assets;
 import de.host.mobsys.starrun.control.Sounds;
 import de.host.mobsys.starrun.models.Difficulty;
 import de.host.mobsys.starrun.models.PowerUp;
+import de.host.mobsys.starrun.models.SpriteSheetObject;
 
-public class Player extends BitmapObject {
+public class Player extends SpriteSheetObject {
     private static final float UP_SPEED = 70;
     private static final float DOWN_SPEED = 40;
     private static final Duration SHIELD_DURATION = Duration.ofSeconds(10);
@@ -42,10 +42,9 @@ public class Player extends BitmapObject {
 
     private Duration remainingShieldDuration = Duration.ZERO;
     private Duration remainingShrinkDuration = Duration.ZERO;
-    private boolean isAnimationPlaying = false;
 
     public Player(Rect rect, Assets assets, Difficulty difficulty, Sounds sounds) {
-        super(rect, assets.getPlayerBitmap());
+        super(rect, assets.getPlayerSpriteSheet(), 8, LoopPolicy.Bounce, Duration.ofMillis(2000));
         this.sounds = sounds;
         velocity = down;
 
@@ -58,13 +57,6 @@ public class Player extends BitmapObject {
         });
     }
 
-    public void setAnimationPlaying(boolean animationPlaying) {
-        isAnimationPlaying = animationPlaying;
-        if (animationPlaying) {
-            velocity = Velocity.ZERO;
-        }
-    }
-
     private boolean hasShield() {
         return !(remainingShieldDuration.isNegative() || remainingShieldDuration.isZero());
     }
@@ -75,15 +67,13 @@ public class Player extends BitmapObject {
 
     @Override
     public void update(Duration elapsedTime) {
-        if (!isAnimationPlaying) {
-            float y = rect.getTop();
-            super.update(elapsedTime);
-            rect.ensureInScreen();
+        float y = rect.getTop();
+        super.update(elapsedTime);
+        rect.ensureInScreen();
 
-            float moved = rect.getTop() - y;
-            if (moved != 0) {
-                onMoveListeners.forEach(listener -> listener.onMove(0, moved));
-            }
+        float moved = rect.getTop() - y;
+        if (moved != 0) {
+            onMoveListeners.forEach(listener -> listener.onMove(0, moved));
         }
 
         boolean wasShrunk = isShrunk();
@@ -93,7 +83,7 @@ public class Player extends BitmapObject {
 
         if (!isShrunk() && wasShrunk) {
             rect.size.multiply(SHRINK_FACTOR);
-            createSprite();
+            createFrameBitmap();
             createShieldSprite();
         }
     }
@@ -137,7 +127,7 @@ public class Player extends BitmapObject {
             } else if (powerUp == PowerUp.Shrink) {
                 if (!isShrunk()) {
                     rect.size.multiply(1 / SHRINK_FACTOR);
-                    createSprite();
+                    createFrameBitmap();
                     createShieldSprite();
                 }
 

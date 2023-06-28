@@ -20,6 +20,7 @@ public class Assets {
     public static final String FONT = "font/press_start_2p.ttf";
     public static final String PAUSE_BUTTON = "img/pause_button.png";
     public static final String PLAYER = "img/player.png";
+    public static final String PLAYER_SHEET = "animation/player.png";
     public static final String POWER_UP_BOMD = "img/power-ups/bomb.png";
     public static final String POWER_UP_SHIELD = "img/power-ups/shield.png";
     public static final String POWER_UP_SHRINK = "img/power-ups/shrink.png";
@@ -46,6 +47,10 @@ public class Assets {
 
     public Bitmap getPlayerBitmap() {
         return readBitmap(PLAYER);
+    }
+
+    public Bitmap getPlayerSpriteSheet() {
+        return readBitmap(PLAYER_SHEET);
     }
 
     public Bitmap getShieldBitmap() {
