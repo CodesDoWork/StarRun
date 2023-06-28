@@ -16,8 +16,11 @@ import de.host.mobsys.starrun.base.size.Rect;
 public interface CollidingGameObject {
     /**
      * Called when a touch event on the view is received.
+     *
+     * @return whether the event is consumed or not
      */
-    default void onTouchEvent(MotionEvent event) {
+    default boolean onTouchEvent(MotionEvent event) {
+        return false;
     }
 
     boolean containsCoordinates(int x, int y);

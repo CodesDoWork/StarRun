@@ -47,13 +47,13 @@ public class GameLayer {
         Point touchedPoint = new Point((int) event.getX(), (int) event.getY());
 
         // go through list in reverse order to go from top to bottom views.
-        ListIterator<GameObject> objectsIterator =
-            getGameObjects().listIterator(gameObjects.size());
+        List<CollidingGameObject> touchableObjects = getCollidingGameObjects();
+        ListIterator<CollidingGameObject> objectsIterator =
+            touchableObjects.listIterator(touchableObjects.size());
         while (objectsIterator.hasPrevious()) {
-            GameObject gameObject = objectsIterator.previous();
-            if (gameObject instanceof CollidingGameObject touchableGameObject
-                && touchableGameObject.containsCoordinates(touchedPoint.x, touchedPoint.y)) {
-                touchableGameObject.onTouchEvent(event);
+            CollidingGameObject gameObject = objectsIterator.previous();
+            if (gameObject.containsCoordinates(touchedPoint.x, touchedPoint.y)
+                && gameObject.onTouchEvent(event)) {
                 return true;
             }
         }
@@ -61,7 +61,13 @@ public class GameLayer {
         return false;
     }
 
-    protected ArrayList<GameObject> getGameObjects() {
+    protected List<GameObject> getGameObjects() {
         return new ArrayList<>(gameObjects);
+    }
+
+    protected List<CollidingGameObject> getCollidingGameObjects() {
+        return List.of(getGameObjects().stream()
+                                       .filter(gameObject -> gameObject instanceof CollidingGameObject)
+                                       .toArray(CollidingGameObject[]::new));
     }
 }
