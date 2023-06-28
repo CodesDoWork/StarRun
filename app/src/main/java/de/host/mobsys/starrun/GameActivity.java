@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.view.Display;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 
 import de.host.mobsys.starrun.base.GameLayer;
 import de.host.mobsys.starrun.base.GameView;
@@ -23,6 +24,7 @@ import de.host.mobsys.starrun.base.views.CollisionLayer;
 import de.host.mobsys.starrun.base.views.TextObject;
 import de.host.mobsys.starrun.control.Assets;
 import de.host.mobsys.starrun.control.PreferenceInfo;
+import de.host.mobsys.starrun.databinding.GameOverBinding;
 import de.host.mobsys.starrun.databinding.PauseMenuBinding;
 import de.host.mobsys.starrun.views.Animation;
 import de.host.mobsys.starrun.views.Background;
@@ -170,6 +172,8 @@ public class GameActivity extends BaseActivity {
         handler.postDelayed(() -> {
             game.stop();
             saveHighScore();
+            createGameOverDialog();
+            openMenu();
         }, 2700);
 
     }
@@ -215,7 +219,25 @@ public class GameActivity extends BaseActivity {
         menu = createDialogBuilder()
             .setMessage(getString(R.string.pause))
             .setView(dialogBinding.getRoot())
+            .setBackground(ContextCompat.getDrawable(this, R.drawable.menu_background))
             .setOnDismissListener(v -> game.start())
+            .create();
+    }
+
+    private  void createGameOverDialog() {
+        GameOverBinding gameOverBinding = GameOverBinding.inflate(getLayoutInflater());
+        gameOverBinding.exit.setOnClickListener(v -> finish());
+        gameOverBinding.restart.setOnClickListener(v -> {
+            isRecreating = true;
+            menu.dismiss();
+            recreate();
+        });
+
+        menu = createDialogBuilder()
+            .setMessage(getString(R.string.game_over))
+            .setView(gameOverBinding.getRoot())
+            .setBackground(ContextCompat.getDrawable(this, R.drawable.menu_background))
+            .setCancelable(false)
             .create();
     }
 }
