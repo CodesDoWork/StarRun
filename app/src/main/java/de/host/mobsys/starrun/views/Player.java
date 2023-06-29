@@ -131,11 +131,9 @@ public class Player extends SpriteSheetObject {
     }
 
     private void unshrink() {
-        if (shrink.isEnabled()) {
-            rect.size.multiply(SHRINK_FACTOR);
-            createFrameBitmap();
-            shield.createSprite();
-        }
+        rect.size.multiply(SHRINK_FACTOR);
+        createFrameBitmap();
+        shield.createSprite();
 
         shrink.disable();
     }
