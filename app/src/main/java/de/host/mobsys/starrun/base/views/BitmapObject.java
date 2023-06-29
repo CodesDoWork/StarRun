@@ -84,6 +84,10 @@ public class BitmapObject extends GameObject implements CollidingGameObject {
         rect.setRotation(rotation);
     }
 
+    public void setRotationSpeed(Velocity1D rotationSpeed) {
+        this.rotationSpeed = rotationSpeed;
+    }
+
     @Override
     public void onCollision(@NonNull CollidingGameObject other, Point point) {
         onCollisionListeners.forEach(listener -> listener.onCollision(other, point));

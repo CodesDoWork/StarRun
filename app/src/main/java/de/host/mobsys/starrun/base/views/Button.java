@@ -8,6 +8,9 @@ import java.util.List;
 
 import de.host.mobsys.starrun.base.size.Rect;
 
+/**
+ * A GameObject representing a button with on click action.
+ */
 public class Button extends BitmapObject {
 
     private final List<OnClickListener> onClickListeners = new ArrayList<>();

@@ -8,6 +8,9 @@ import java.util.List;
 import de.host.mobsys.starrun.base.CollidingGameObject;
 import de.host.mobsys.starrun.base.GameLayer;
 
+/**
+ * GameLayer which contains CollidingGameObjects for collision detection
+ */
 public class CollisionLayer extends GameLayer {
 
     @Override

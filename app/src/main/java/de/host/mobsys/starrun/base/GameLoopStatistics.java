@@ -6,6 +6,9 @@ import java.time.Duration;
 
 import de.host.mobsys.starrun.base.physics.DurationUtils;
 
+/**
+ * Used to measure performance of a GameLoop
+ */
 public class GameLoopStatistics {
     private static final String TAG = "GAME STATS";
 

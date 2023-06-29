@@ -1,11 +1,16 @@
 package de.host.mobsys.starrun.models;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import de.host.mobsys.starrun.control.PreferenceInfo;
 import de.host.mobsys.starrun.control.PreferenceStorage;
 
+/**
+ * A class to handle the game score.
+ */
 public class Score {
 
     private final List<OnChangeListener> onChangeListeners = new ArrayList<>();
@@ -14,10 +19,9 @@ public class Score {
     private int score = 0;
     private int highScore;
 
-    public Score(PreferenceStorage storage) {
+    public Score(@NonNull PreferenceStorage storage) {
         this.storage = storage;
         highScore = storage.get(PreferenceInfo.HIGHSCORE);
-
     }
 
     public void increment() {

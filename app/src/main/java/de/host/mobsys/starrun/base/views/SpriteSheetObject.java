@@ -1,4 +1,4 @@
-package de.host.mobsys.starrun.models;
+package de.host.mobsys.starrun.base.views;
 
 import android.graphics.Bitmap;
 
@@ -6,15 +6,17 @@ import java.time.Duration;
 
 import de.host.mobsys.starrun.base.size.BitmapUtils;
 import de.host.mobsys.starrun.base.size.Rect;
-import de.host.mobsys.starrun.base.views.BitmapObject;
 
+/**
+ * Class to draw a GameObject with an animation by a sprite sheet.
+ */
 public class SpriteSheetObject extends BitmapObject {
 
     private final Bitmap spriteSheet;
     private final int frameCount;
     private final int frameWidth;
     private final LoopPolicy loopPolicy;
-    private final Duration frameDuration;
+    private final Duration targetFrameDuration;
 
     private Duration currentFrameDuration = Duration.ZERO;
     private int currentFrameIdx = 0;
@@ -32,7 +34,7 @@ public class SpriteSheetObject extends BitmapObject {
         this.frameCount = frameCount;
         frameWidth = spriteSheet.getWidth() / frameCount;
         this.loopPolicy = loopPolicy;
-        this.frameDuration = duration.dividedBy(frameCount);
+        this.targetFrameDuration = duration.dividedBy(frameCount);
 
         createFrameBitmap();
     }
@@ -42,26 +44,37 @@ public class SpriteSheetObject extends BitmapObject {
         super.update(elapsedTime);
 
         currentFrameDuration = currentFrameDuration.plus(elapsedTime);
-        if (currentFrameDuration.compareTo(frameDuration) >= 0) {
-            currentFrameDuration = currentFrameDuration.minus(frameDuration);
-            updateFrameIndex();
-            if (currentFrameIdx == frameCount || currentFrameIdx < 0) {
-                switch (loopPolicy) {
-                    case Replay -> currentFrameIdx = 0;
-                    case Bounce -> {
-                        isCountingUp = !isCountingUp;
-                        updateFrameIndex();
-                    }
-                    case Destroy -> destroy();
-                }
-            }
+        if (currentFrameDuration.compareTo(targetFrameDuration) >= 0) {
+            updateFrame();
+        }
+    }
 
-            createFrameBitmap();
+    private void updateFrame() {
+        currentFrameDuration = currentFrameDuration.minus(targetFrameDuration);
+        updateFrameIndex();
+        createFrameBitmap();
+    }
+
+    private boolean needsToLoop() {
+        return currentFrameIdx == frameCount || currentFrameIdx < 0;
+    }
+
+    private void loop() {
+        switch (loopPolicy) {
+            case Replay -> currentFrameIdx = 0;
+            case Bounce -> {
+                isCountingUp = !isCountingUp;
+                updateFrameIndex();
+            }
+            case Destroy -> destroy();
         }
     }
 
     private void updateFrameIndex() {
         currentFrameIdx += isCountingUp ? 1 : -1;
+        if (needsToLoop()) {
+            loop();
+        }
     }
 
     /**
@@ -69,12 +82,18 @@ public class SpriteSheetObject extends BitmapObject {
      */
     protected void createFrameBitmap() {
         int srcX = currentFrameIdx * frameWidth;
-        if (srcX + frameWidth <= spriteSheet.getWidth()) {
+        if (srcX >= 0 && srcX + frameWidth <= spriteSheet.getWidth()) {
             sprite = Bitmap.createBitmap(spriteSheet, srcX, 0, frameWidth, spriteSheet.getHeight());
             sprite = BitmapUtils.scaleBitmap(sprite, rect.size);
         }
     }
 
+    /**
+     * How to loop the animation:<br/>
+     * Replay - start from beginning<br/>
+     * Bounce - go back and forth<br/>
+     * Destroy - no looping, destroy when animation finished<br/>
+     */
     public enum LoopPolicy {
         Replay,
         Bounce,

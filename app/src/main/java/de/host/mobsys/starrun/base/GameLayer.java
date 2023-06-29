@@ -56,6 +56,10 @@ public class GameLayer {
     }
 
     public boolean onTouchEvent(MotionEvent event, Point touchStart) {
+        if (status != Status.Enabled) {
+            return false;
+        }
+
         Point touchedPoint = new Point((int) event.getX(), (int) event.getY());
 
         // go through list in reverse order to go from top to bottom views.
@@ -84,6 +88,10 @@ public class GameLayer {
                                        .toArray(CollidingGameObject[]::new));
     }
 
+    /**
+     * Status a layer to completely enable/disable it,
+     * or only enable draw (and therefore disable any updates).
+     */
     public enum Status {
         Enabled,
         DrawEnabled,

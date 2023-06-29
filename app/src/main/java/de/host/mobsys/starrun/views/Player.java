@@ -1,8 +1,6 @@
 package de.host.mobsys.starrun.views;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Point;
 import android.view.MotionEvent;
 
@@ -16,41 +14,35 @@ import de.host.mobsys.starrun.R;
 import de.host.mobsys.starrun.base.CollidingGameObject;
 import de.host.mobsys.starrun.base.physics.Velocity;
 import de.host.mobsys.starrun.base.physics.VelocityBuilder;
-import de.host.mobsys.starrun.base.size.BitmapUtils;
 import de.host.mobsys.starrun.base.size.Rect;
-import de.host.mobsys.starrun.base.size.Size;
+import de.host.mobsys.starrun.base.views.SpriteSheetObject;
 import de.host.mobsys.starrun.control.Assets;
 import de.host.mobsys.starrun.control.Sounds;
 import de.host.mobsys.starrun.models.Difficulty;
 import de.host.mobsys.starrun.models.PowerUp;
-import de.host.mobsys.starrun.models.SpriteSheetObject;
+import de.host.mobsys.starrun.models.Shrink;
 
+/**
+ * Class to handle the player
+ */
 public class Player extends SpriteSheetObject {
     private static final float UP_SPEED = 70;
     private static final float DOWN_SPEED = 40;
-    private static final Duration SHIELD_DURATION = Duration.ofSeconds(10);
-    private static final Duration SHRINK_DURATION = Duration.ofSeconds(10);
     private static final float SHRINK_FACTOR = 2;
 
     private final List<OnMoveListener> onMoveListeners = new ArrayList<>();
+    private final Shield shield;
     private final Sounds sounds;
-
-    private final Bitmap originalShieldSprite;
-    private Bitmap shieldSprite;
+    private final Shrink shrink = new Shrink();
 
     private Velocity down = new VelocityBuilder().down(DOWN_SPEED).build();
     private Velocity up = new VelocityBuilder().up(UP_SPEED).build();
 
-    private Duration remainingShieldDuration = Duration.ZERO;
-    private Duration remainingShrinkDuration = Duration.ZERO;
-
     public Player(Rect rect, Assets assets, Difficulty difficulty, Sounds sounds) {
         super(rect, assets.getPlayerSpriteSheet(), 8, LoopPolicy.Bounce, Duration.ofMillis(2000));
+        this.shield = new Shield(assets.getShieldBitmap(), rect);
         this.sounds = sounds;
         velocity = down;
-
-        this.originalShieldSprite = assets.getShieldBitmap();
-        createShieldSprite();
 
         difficulty.addChangeListener(value -> {
             down = new VelocityBuilder().down(DOWN_SPEED * difficulty.getHalf()).build();
@@ -58,45 +50,34 @@ public class Player extends SpriteSheetObject {
         });
     }
 
-    private boolean hasShield() {
-        return !(remainingShieldDuration.isNegative() || remainingShieldDuration.isZero());
-    }
-
-    private boolean isShrunk() {
-        return !(remainingShrinkDuration.isNegative() || remainingShieldDuration.isZero());
-    }
-
     @Override
     public void update(Duration elapsedTime) {
         float y = rect.getTop();
         super.update(elapsedTime);
-        rect.ensureInScreen();
 
+        rect.ensureInScreen();
         float moved = rect.getTop() - y;
         if (moved != 0) {
             onMoveListeners.forEach(listener -> listener.onMove(0, moved));
         }
 
-        boolean wasShrunk = isShrunk();
+        updatePowerUps(elapsedTime);
+    }
 
-        remainingShieldDuration = remainingShieldDuration.minus(elapsedTime);
-        remainingShrinkDuration = remainingShrinkDuration.minus(elapsedTime);
+    private void updatePowerUps(Duration elapsedTime) {
+        shield.update(elapsedTime);
 
-        if (!isShrunk() && wasShrunk) {
-            rect.size.multiply(SHRINK_FACTOR);
-            createFrameBitmap();
-            createShieldSprite();
+        boolean wasShrunk = shrink.isEnabled();
+        shrink.update(elapsedTime);
+        if (!shrink.isEnabled() && wasShrunk) {
+            unshrink();
         }
     }
 
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
-        if (hasShield()) {
-            Matrix spriteMatrix = rect.getMatrix();
-            spriteMatrix.preTranslate(0, -rect.size.getYPx() / 2f);
-            canvas.drawBitmap(shieldSprite, spriteMatrix, null);
-        }
+        shield.draw(canvas);
     }
 
     @Override
@@ -115,35 +96,48 @@ public class Player extends SpriteSheetObject {
         super.onCollision(other, point);
 
         if (other instanceof Obstacle) {
-            if (hasShield()) {
-                sounds.playSound(R.raw.no_power_up);
-                remainingShieldDuration = Duration.ZERO;
-            } else {
-                sounds.playSound(R.raw.death);
-                destroy();
-            }
+            onObstacleCollision();
         } else if (other instanceof PowerUpView powerUpView) {
-            PowerUp powerUp = powerUpView.powerUp;
-            sounds.playSound(powerUp.audioId);
-            if (powerUp == PowerUp.Shield) {
-                remainingShieldDuration = SHIELD_DURATION;
-            } else if (powerUp == PowerUp.Shrink) {
-                if (!isShrunk()) {
-                    rect.size.multiply(1 / SHRINK_FACTOR);
-                    createFrameBitmap();
-                    createShieldSprite();
-                }
-
-                remainingShrinkDuration = SHRINK_DURATION;
-            }
+            onPowerUpCollision(powerUpView.powerUp);
         }
     }
 
-    private void createShieldSprite() {
-        shieldSprite = BitmapUtils.scaleBitmap(
-            originalShieldSprite,
-            Size.squareFromWidth(rect.size.getX())
-        );
+    private void onObstacleCollision() {
+        if (shield.isEnabled()) {
+            sounds.playSound(R.raw.no_power_up);
+            shield.disable();
+        } else {
+            sounds.playSound(R.raw.death);
+            destroy();
+        }
+    }
+
+    private void onPowerUpCollision(PowerUp powerUp) {
+        sounds.playSound(powerUp.audioId);
+        switch (powerUp) {
+            case Shield -> shield.enable();
+            case Shrink -> shrink();
+        }
+    }
+
+    private void shrink() {
+        if (!shrink.isEnabled()) {
+            rect.size.multiply(1 / SHRINK_FACTOR);
+            createFrameBitmap();
+            shield.createSprite();
+        }
+
+        shrink.enable();
+    }
+
+    private void unshrink() {
+        if (shrink.isEnabled()) {
+            rect.size.multiply(SHRINK_FACTOR);
+            createFrameBitmap();
+            shield.createSprite();
+        }
+
+        shrink.disable();
     }
 
     public void addOnMoveListener(OnMoveListener listener) {

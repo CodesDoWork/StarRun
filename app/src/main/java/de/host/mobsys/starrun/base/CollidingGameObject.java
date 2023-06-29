@@ -47,6 +47,12 @@ public interface CollidingGameObject {
         return result.get();
     }
 
+    /**
+     * Called on a collision
+     *
+     * @param other the object this collided with
+     * @param point coordinates of the collision
+     */
     default void onCollision(@NonNull CollidingGameObject other, Point point) {
     }
 

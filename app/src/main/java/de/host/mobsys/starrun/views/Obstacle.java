@@ -8,14 +8,9 @@ import androidx.annotation.NonNull;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import de.host.mobsys.starrun.R;
 import de.host.mobsys.starrun.base.CollidingGameObject;
-import de.host.mobsys.starrun.base.physics.Velocity1D;
-import de.host.mobsys.starrun.base.physics.VelocityBuilder;
-import de.host.mobsys.starrun.base.size.BitmapUtils;
-import de.host.mobsys.starrun.base.size.Position;
 import de.host.mobsys.starrun.base.size.Rect;
 import de.host.mobsys.starrun.base.views.BitmapObject;
 import de.host.mobsys.starrun.control.Assets;
@@ -24,8 +19,14 @@ import de.host.mobsys.starrun.control.Sounds;
 import de.host.mobsys.starrun.models.Difficulty;
 
 public class Obstacle extends BitmapObject {
-
-    private static final List<Rect> lastObstacleSpawns = new ArrayList<>();
+    private static final float BASE_MIN_HEIGHT = 5;
+    private static final float MAX_HEIGHT = 25;
+    private static final float BASE_MIN_Y = 2;
+    private static final float BASE_MAX_Y = 98;
+    private static final int MAX_PLACEMENT_TRIES = 3;
+    private static final float MAX_BASE_SPEED = 22.5f;
+    private static final int OBSTACLES_TO_RESPECT = 3;
+    private static final List<Rect> LAST_OBSTACLE_SPAWNS = new ArrayList<>();
 
     private final Sounds sounds;
 
@@ -42,49 +43,40 @@ public class Obstacle extends BitmapObject {
      * @return The created Obstacle
      */
     public static Obstacle createRandom(Assets assets, Difficulty difficulty, Sounds sounds) {
-        Random random = new Random();
         Bitmap sprite = assets.getRandomObstacle();
+        Spawner spawner = new Spawner(difficulty, sprite);
 
-        float minHeight = 5 * difficulty.getHalf();
-        float maxHeight = 25;
-        float height = RandomUtils.between(minHeight, maxHeight);
-
-        float minY = 2 + minHeight - height;
-        float maxY = 98 - minHeight;
-
-        Rect rect;
-        int tries = 0;
-        int maxTries = 3;
-        do {
-            float y = RandomUtils.between(minY, maxY);
-            Position position = new Position(110, y);
-            rect = new Rect(position, BitmapUtils.getSizeByHeight(sprite, height));
-        } while (++tries < maxTries && isCollidingSpawningArea(rect));
+        Rect rect = getRandomRect(difficulty, spawner);
         Obstacle obstacle = new Obstacle(rect, sprite, sounds);
 
-        lastObstacleSpawns.add(rect);
-        if (lastObstacleSpawns.size() > 3) {
-            lastObstacleSpawns.remove(0);
-        }
-
-        float minSpeed = 4 * difficulty.getHalf();
-        float maxSpeed = 22.5f - height / 3f;
-        float speed = RandomUtils.between(minSpeed, maxSpeed) * difficulty.get();
-        obstacle.setVelocity(new VelocityBuilder().left(speed).build());
-
-        obstacle.setRotation(RandomUtils.between(0, 360));
-
-        int minSpin = 5;
-        int maxSpin = 90;
-        float spin = RandomUtils.between(minSpin, maxSpin);
-        spin *= random.nextBoolean() ? 1 : -1;
-        obstacle.rotationSpeed = new Velocity1D(spin);
+        spawner.setSpeed(obstacle, MAX_BASE_SPEED);
+        spawner.rotate(obstacle);
 
         return obstacle;
     }
 
+    private static Rect getRandomRect(Difficulty difficulty, Spawner spawner) {
+        float minHeight = BASE_MIN_HEIGHT * difficulty.getHalf();
+        float height = RandomUtils.between(minHeight, MAX_HEIGHT);
+        float minY = BASE_MIN_Y + minHeight - height;
+        float maxY = BASE_MAX_Y - minHeight;
+
+        Rect rect;
+        int tries = 0;
+        do {
+            rect = spawner.createRect(minY, maxY, height);
+        } while (++tries < MAX_PLACEMENT_TRIES && isCollidingSpawningArea(rect));
+
+        LAST_OBSTACLE_SPAWNS.add(rect);
+        if (LAST_OBSTACLE_SPAWNS.size() > OBSTACLES_TO_RESPECT) {
+            LAST_OBSTACLE_SPAWNS.remove(0);
+        }
+
+        return rect;
+    }
+
     private static boolean isCollidingSpawningArea(Rect rect) {
-        for (Rect lastObstacleSpawn : lastObstacleSpawns) {
+        for (Rect lastObstacleSpawn : LAST_OBSTACLE_SPAWNS) {
             if (rect.getTop() <= lastObstacleSpawn.getBottom()
                 && rect.getBottom() >= lastObstacleSpawn.getTop()) {
                 return true;
