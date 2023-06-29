@@ -21,6 +21,7 @@
         <item name="android:shadowDx">4</item>
         <item name="android:shadowDy">4</item>
         <item name="android:shadowRadius">4</item>
+        <item name="android:textColor">@color/white</item>
         <item name="strokeColor">@color/white</item>
         <item name="strokeWidth">1dp</item>
         <item name="shapeAppearance">@style/buttonShapeAppearance</item>
