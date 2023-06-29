@@ -5,6 +5,9 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class to calculate difficulty based on score.
+ */
 public class Difficulty {
     private static final String TAG = "DIFFICULTY";
 

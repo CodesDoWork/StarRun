@@ -21,9 +21,8 @@ public class MainActivity extends BaseActivity {
         sounds.playMusic(R.raw.lobby_music);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-        
         binding.play.setOnClickListener(v -> startActivity(new Intent(this, GameActivity.class)));
+        setContentView(binding.getRoot());
     }
 
     @Override

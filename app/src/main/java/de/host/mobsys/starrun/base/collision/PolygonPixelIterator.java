@@ -5,7 +5,17 @@ import android.graphics.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Helper class to iterate over every pixel of any polygon
+ */
 public class PolygonPixelIterator {
+
+    /**
+     * Iterates over every pixel of a polygon and calls a callback
+     *
+     * @param corners  Corner points of the polygon
+     * @param callback Called on every pixel. Return true to stop the iteration process
+     */
     public void iteratePolygonPixels(Point[] corners, PixelCallback callback) {
         List<Edge> edges = createEdges(corners);
 

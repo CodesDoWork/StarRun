@@ -15,10 +15,13 @@ import de.host.mobsys.starrun.base.size.SizeSystem;
 import de.host.mobsys.starrun.control.Assets;
 import de.host.mobsys.starrun.models.Difficulty;
 
+/**
+ * Class to handle the game background
+ */
 public class Background extends GameObject {
 
-    private final Assets assets;
     private final float height;
+    private final Assets assets;
     private final List<Bitmap> sprites = new ArrayList<>();
 
     public Background(float height, Assets assets, Difficulty difficulty) {
@@ -29,7 +32,7 @@ public class Background extends GameObject {
         this.assets = assets;
 
         int width = 0;
-        while (width < SizeSystem.getDisplayWidth()) {
+        while (width < SizeSystem.getMaxDisplayWidth()) {
             addRandomSprite();
             width += sprites.get(sprites.size() - 1).getWidth();
         }
@@ -55,7 +58,7 @@ public class Background extends GameObject {
         int spriteIdx = 0;
         for (
             int x = position.getXPx();
-            x < SizeSystem.getDisplayWidth() * 1.1f;
+            x < SizeSystem.getMaxDisplayWidth();
             x += sprites.get(spriteIdx - 1).getWidth()
         ) {
             canvas.drawBitmap(sprites.get(spriteIdx++), x, position.getYPx(), null);

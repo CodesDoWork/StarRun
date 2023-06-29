@@ -13,11 +13,13 @@ import java.util.Map;
 
 import de.host.mobsys.starrun.R;
 
+/**
+ * Class to load, play and stop sound effects and music.
+ */
 public class Sounds {
     private final Context context;
     private final MediaPlayer player;
     private final SoundPool soundPool;
-
     private final Map<Integer, Integer> resToSoundIds = new HashMap<>();
 
     private boolean isMusicPaused = false;
@@ -40,6 +42,10 @@ public class Sounds {
             .setAudioAttributes(attributes)
             .build();
 
+        prepareSounds();
+    }
+
+    private void prepareSounds() {
         loadSound(R.raw.countdown);
         loadSound(R.raw.countdown_end);
         loadSound(R.raw.death);
@@ -53,6 +59,11 @@ public class Sounds {
         resToSoundIds.put(audioId, soundPool.load(context, audioId, 1));
     }
 
+    @SuppressWarnings("ConstantConditions")
+    public void playSound(@RawRes int audioId) {
+        soundPool.play(resToSoundIds.get(audioId), 1, 1, 1, 0, 1.0f);
+    }
+
     public void playMusic(@RawRes int audioId) {
         try {
             player.setDataSource(context.getResources().openRawResourceFd(audioId));
@@ -62,19 +73,6 @@ public class Sounds {
         } catch (IOException e) {
             throw new RuntimeException("Could not load audio resource", e);
         }
-    }
-
-    public void playSound(@RawRes int audioId) {
-        playSound(audioId, 0);
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    public void playSound(@RawRes int audioId, int loop) {
-        soundPool.play(resToSoundIds.get(audioId), 1, 1, 1, loop, 1.0f);
-    }
-
-    public boolean isMusicPlaying() {
-        return player.isPlaying();
     }
 
     public void resumeMusic() {
@@ -87,6 +85,10 @@ public class Sounds {
     public void pauseMusic() {
         player.pause();
         isMusicPaused = true;
+    }
+
+    public boolean isMusicPlaying() {
+        return player.isPlaying();
     }
 
     public void release() {

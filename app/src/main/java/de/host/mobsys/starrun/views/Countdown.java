@@ -12,6 +12,10 @@ import de.host.mobsys.starrun.base.size.SizeSystem;
 import de.host.mobsys.starrun.base.views.TextObject;
 import de.host.mobsys.starrun.control.Sounds;
 
+/**
+ * Displays a countdown animation.
+ * It is not meant to be moved with a velocity!
+ */
 public class Countdown extends TextObject {
 
     private static final Velocity1D alphaShrinkSpeed = new Velocity1D(255);
@@ -48,6 +52,7 @@ public class Countdown extends TextObject {
         if (remainingDuration.isZero() || remainingDuration.isNegative()) {
             sounds.playSound(R.raw.countdown_end);
             destroy();
+            return;
         }
 
         String timerText = String.valueOf(remainingDuration.getSeconds() + 1);

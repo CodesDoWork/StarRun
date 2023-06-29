@@ -7,6 +7,9 @@ import de.host.mobsys.starrun.base.GameObject;
 import de.host.mobsys.starrun.base.size.Position;
 import de.host.mobsys.starrun.base.size.SizeSystem;
 
+/**
+ * A GameObject to display text
+ */
 public class TextObject extends GameObject {
 
     protected final Paint paint;

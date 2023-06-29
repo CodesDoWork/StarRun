@@ -10,19 +10,18 @@ import java.util.Random;
 
 import de.host.mobsys.starrun.R;
 import de.host.mobsys.starrun.base.CollidingGameObject;
-import de.host.mobsys.starrun.base.physics.Velocity1D;
-import de.host.mobsys.starrun.base.physics.VelocityBuilder;
-import de.host.mobsys.starrun.base.size.BitmapUtils;
-import de.host.mobsys.starrun.base.size.Position;
 import de.host.mobsys.starrun.base.size.Rect;
 import de.host.mobsys.starrun.base.views.BitmapObject;
 import de.host.mobsys.starrun.control.Assets;
-import de.host.mobsys.starrun.control.RandomUtils;
 import de.host.mobsys.starrun.control.Sounds;
 import de.host.mobsys.starrun.models.Difficulty;
 import de.host.mobsys.starrun.models.PowerUp;
 
 public class PowerUpView extends BitmapObject {
+    private static final float HEIGHT = 7.5f;
+    private static final float MIN_Y = 2;
+    private static final float MAX_Y = 90;
+    private static final float MAX_BASE_SPEED = 15;
 
     public final PowerUp powerUp;
     private final Sounds sounds;
@@ -42,32 +41,16 @@ public class PowerUpView extends BitmapObject {
      */
     public static PowerUpView createRandom(Assets assets, Difficulty difficulty, Sounds sounds) {
         Random random = new Random();
-
         PowerUp powerUp = PowerUp.values()[random.nextInt(PowerUp.values().length)];
+
         Bitmap sprite = assets.readBitmap(powerUp.asset);
+        Spawner spawner = new Spawner(difficulty, sprite);
 
-        float height = 7.5f;
-        int minY = 2;
-        int maxY = 90;
-        float y = RandomUtils.between(minY, maxY);
-        Position position = new Position(110, y);
-        Rect rect = new Rect(position, BitmapUtils.getSizeByHeight(sprite, height));
-
+        Rect rect = spawner.createRect(MIN_Y, MAX_Y, HEIGHT);
         PowerUpView powerUpView = new PowerUpView(rect, sprite, sounds, powerUp);
-
-        float minSpeed = 4 * difficulty.getHalf();
-        float maxSpeed = 15 - height / 3f;
-        float speed = RandomUtils.between(minSpeed, maxSpeed) * difficulty.get();
-        powerUpView.setVelocity(new VelocityBuilder().left(speed).build());
-
+        spawner.setSpeed(powerUpView, MAX_BASE_SPEED);
         if (powerUp != PowerUp.Shrink) {
-            powerUpView.setRotation(RandomUtils.between(0, 360));
-
-            int minSpin = 5;
-            int maxSpin = 90;
-            float spin = RandomUtils.between(minSpin, maxSpin);
-            spin *= random.nextBoolean() ? 1 : -1;
-            powerUpView.rotationSpeed = new Velocity1D(spin);
+            spawner.rotate(powerUpView);
         }
 
         return powerUpView;

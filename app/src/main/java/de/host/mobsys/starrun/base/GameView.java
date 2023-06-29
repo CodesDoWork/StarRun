@@ -16,19 +16,19 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.function.Predicate;
 
 /**
  * This class can be added as a view to an activity.
  * It runs a game loop and triggers update, draw and touch events on its GameLayers and therefore
  * their GameObjects.
  */
-public class GameView extends SurfaceView implements SurfaceHolder.Callback, View.OnTouchListener {
+public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private final SurfaceHolder surfaceHolder;
     private final GameLoop gameLoop;
     private final List<GameLayer> layers = new ArrayList<>();
 
     private Bitmap savedStateBitmap = null;
-    private Point touchStart = null;
 
     public GameView(Context context) {
         super(context);
@@ -36,7 +36,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Vie
         surfaceHolder.addCallback(this);
         gameLoop = GameLoop.withFPSRate(60);
 
-        setOnTouchListener(this);
+        setOnTouchListener(new GameTouchListener());
     }
 
     public void start() {
@@ -61,10 +61,6 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Vie
         return gameLoop.isRunning();
     }
 
-    public void add(GameLayer layer) {
-        layers.add(layer);
-    }
-
     private void update(Duration elapsedTime) {
         layers.forEach(layer -> layer.update(elapsedTime));
     }
@@ -83,34 +79,26 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Vie
         layers.forEach(layer -> layer.draw(canvas));
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            touchStart = new Point((int) event.getX(), (int) event.getY());
-        }
+    public void add(GameLayer layer) {
+        layers.add(layer);
+    }
 
-        boolean isTouchConsumed = false;
-        ListIterator<GameLayer> layersIterator = layers.listIterator(layers.size());
-        while (layersIterator.hasPrevious() && !isTouchConsumed) {
-            GameLayer layer = layersIterator.previous();
-            isTouchConsumed = layer.onTouchEvent(event, touchStart);
-            if (!isTouchConsumed) {
-                layer.onGlobalTouchEvent(event);
+    public List<GameLayer> getLayers() {
+        return new ArrayList<>(layers);
+    }
+
+    public void setLayerStatusIf(Predicate<GameLayer> predicate, GameLayer.Status status) {
+        for (GameLayer layer : getLayers()) {
+            if (predicate.test(layer)) {
+                layer.setStatus(status);
             }
         }
-
-        return true;
     }
 
     public void saveState() {
         savedStateBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(savedStateBitmap);
         draw(canvas);
-    }
-
-    public List<GameLayer> getLayers() {
-        return new ArrayList<>(layers);
     }
 
     @Override
@@ -137,5 +125,31 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Vie
     @FunctionalInterface
     private interface UseCanvas {
         void useCanvas(Canvas canvas);
+    }
+
+    private class GameTouchListener implements OnTouchListener {
+
+        private Point touchStart = null;
+
+        @SuppressLint("ClickableViewAccessibility")
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                // save touch start for later events
+                touchStart = new Point((int) event.getX(), (int) event.getY());
+            }
+
+            boolean isTouchConsumed = false;
+            ListIterator<GameLayer> layersIterator = layers.listIterator(layers.size());
+            while (layersIterator.hasPrevious() && !isTouchConsumed) {
+                GameLayer layer = layersIterator.previous();
+                isTouchConsumed = layer.onTouchEvent(event, touchStart);
+                if (!isTouchConsumed) {
+                    layer.onGlobalTouchEvent(event);
+                }
+            }
+
+            return true;
+        }
     }
 }

@@ -5,7 +5,18 @@ import android.graphics.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class provides functions to calculate intersections between polygons.
+ */
 public class IntersectionCalculator {
+
+    /**
+     * Calculates the intersection two polygons.
+     *
+     * @param shape1 corners of the first polygon
+     * @param shape2 corner of the second polygon
+     * @return the intersection polygon corners
+     */
     public static Point[] computeIntersection(Point[] shape1, Point[] shape2) {
         // Clip shape1 against shape2
         Point[] result = clipPolygon(shape1, shape2);
@@ -16,6 +27,13 @@ public class IntersectionCalculator {
         return result;
     }
 
+    /**
+     * Clips a polygon from another polygon.
+     *
+     * @param polygon polygon to clip
+     * @param clipper polygon to use for clipping
+     * @return the clipped polygon corners
+     */
     private static Point[] clipPolygon(Point[] polygon, Point[] clipper) {
         if (polygon.length == 0) {
             return new Point[0];

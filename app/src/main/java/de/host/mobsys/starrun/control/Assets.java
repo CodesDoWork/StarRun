@@ -12,6 +12,9 @@ import java.io.InputStream;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Class to handle assets and their loading
+ */
 public class Assets {
 
     public static final String ASTEROIDS_DIR = "img/obstacles";
@@ -61,14 +64,6 @@ public class Assets {
         return readBitmap(EXPLOSION_ANIMATION);
     }
 
-    public void readAsset(String name, @NonNull ReadAssetCallback callback) {
-        try (InputStream stream = assetManager.open(name)) {
-            callback.read(stream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public Typeface readFont() {
         return Typeface.createFromAsset(assetManager, FONT);
     }
@@ -78,6 +73,14 @@ public class Assets {
         readAsset(name, stream -> bitmapRef.set(BitmapFactory.decodeStream(stream)));
 
         return bitmapRef.get();
+    }
+
+    public void readAsset(String name, @NonNull ReadAssetCallback callback) {
+        try (InputStream stream = assetManager.open(name)) {
+            callback.read(stream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getRandomAsset(String dir) {
