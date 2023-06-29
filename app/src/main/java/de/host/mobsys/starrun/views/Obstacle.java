@@ -2,7 +2,6 @@ package de.host.mobsys.starrun.views;
 
 import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -62,7 +61,6 @@ public class Obstacle extends BitmapObject {
             rect = new Rect(position, BitmapUtils.getSizeByHeight(sprite, height));
         } while (++tries < maxTries && isCollidingSpawningArea(rect));
         Obstacle obstacle = new Obstacle(rect, sprite, sounds);
-        Log.d("OBSTACLE", "Tries: " + tries);
 
         lastObstacleSpawns.add(rect);
         if (lastObstacleSpawns.size() > 3) {

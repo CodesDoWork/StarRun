@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Difficulty {
+    private static final String TAG = "DIFFICULTY";
 
     private final List<OnChangeListener> onChangeListeners = new ArrayList<>();
 
@@ -13,7 +14,7 @@ public class Difficulty {
 
     public void setFromScore(int score) {
         value = (float) (1 + Math.log(1 + score) / 2);
-        Log.d("Difficulty", "setFromScore: " + value);
+        Log.d(TAG, "setFromScore: " + score + " -> " + value);
         onChangeListeners.forEach(listener -> listener.onChange(value));
     }
 

@@ -7,6 +7,7 @@ import java.time.Duration;
 import de.host.mobsys.starrun.base.physics.DurationUtils;
 
 public class GameLoopStatistics {
+    private static final String TAG = "GAME STATS";
 
     private float updates = 0;
     private float frames = 0;
@@ -24,7 +25,7 @@ public class GameLoopStatistics {
 
     private void log() {
         if (DurationUtils.toSeconds(secondCounter) >= 1) {
-            Log.d("GAME STATS", "FPS: " + frames + ", UPS: " + updates);
+            Log.d(TAG, "FPS: " + frames + ", UPS: " + updates);
 
             updates = 0;
             frames = 0;
