@@ -116,14 +116,20 @@ public class GameActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        pauseGame();
+        if (!game.isMenuDisabled()) {
+            pauseGame();
+        }
     }
 
     private void pauseGame() {
         game.pause();
-        if (!menu.isShowing() && !isRecreating) {
+        if (canOpenMenu()) {
             menu.show();
         }
+    }
+
+    private boolean canOpenMenu() {
+        return !menu.isShowing() && !isRecreating;
     }
 }
 

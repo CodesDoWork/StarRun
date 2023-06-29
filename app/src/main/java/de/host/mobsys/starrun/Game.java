@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.host.mobsys.starrun.base.GameLayer;
+import de.host.mobsys.starrun.base.GameObject;
 import de.host.mobsys.starrun.base.GameView;
 import de.host.mobsys.starrun.base.size.BitmapUtils;
 import de.host.mobsys.starrun.base.size.Position;
@@ -65,6 +66,8 @@ public class Game {
     private OnOpenMenuListener openMenuListener = null;
     private TextObject scoreObject;
     private Player player;
+
+    private boolean isMenuDisabled = false;
 
     public Game(@NonNull Context context, Sounds sounds, @NonNull Score score, int highscore) {
         this.context = context;
@@ -204,10 +207,15 @@ public class Game {
     }
 
     private void countdown() {
+        // clear countdown before to avoid inconsistencies
+        countdownLayer.getGameObjects().forEach(GameObject::destroy);
+
         game.setLayerStatusIf(layer -> layer != countdownLayer, GameLayer.Status.DrawEnabled);
+        isMenuDisabled = true;
 
         Countdown countdown = new Countdown(new Position(50, 50), createPaint(120), sounds);
         countdown.addOnDestroyListener(() -> {
+            isMenuDisabled = false;
             game.setLayerStatusIf(layer -> layer != countdownLayer, GameLayer.Status.Enabled);
             if (!sounds.isMusicPlaying()) {
                 sounds.playMusic(R.raw.game_music);
@@ -282,6 +290,10 @@ public class Game {
             pause();
             gameOverListeners.forEach(OnGameOverListener::onGameOver);
         });
+    }
+
+    public boolean isMenuDisabled() {
+        return isMenuDisabled;
     }
 
     public void setOpenMenuListener(OnOpenMenuListener openMenuListener) {
